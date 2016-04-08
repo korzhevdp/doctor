@@ -1,0 +1,14 @@
+.DS_Store
+
+backup/*
+aes256/*
+application/*
+!application/controllers/*
+!application/models/*
+!application/views/*
+cert/*
+ckeditor/*
+docs/*
+system/*
+images/*
+user_guide/*
