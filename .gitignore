@@ -2,12 +2,16 @@
 
 api/*
 backup/*
-aes256/*
-application/*
-!application/controllers/*
-!application/models/*
-!application/views/*
 cert/*
+application/core
+application/cache
+application/errors
+application/hooks
+application/logs
+application/libraries
+application/helpers
+application/language
+application/third_party
 ckeditor/*
 docs/*
 system/*

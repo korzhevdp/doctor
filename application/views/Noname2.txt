@@ -1,0 +1,46 @@
+CREATE TABLE `staff` (
+  `id` INTEGER(11) NOT NULL AUTO_INCREMENT COMMENT 'staff unit ID',
+  `staff_f` TINYTEXT,
+  `staff_i` TINYTEXT,
+  `staff_o` TINYTEXT,
+  `staff_address` TEXT,
+  `staff_birthdate` DATETIME DEFAULT NULL,
+  `staff_staff` TINYTEXT,
+  `staff_phone` TINYTEXT,
+  `staff_email` TEXT,
+  `staff_spec` TEXT COMMENT 'specialisation',
+  `staff_location` TEXT,
+  `staff_passport` LONGTEXT COMMENT 'AES-encode',
+  `staff_pass_s` TINYTEXT,
+  `staff_pass_n` TINYTEXT,
+  `staff_pass_issuedate` DATETIME DEFAULT NULL,
+  `staff_pass_issued` TEXT,
+  `staff_edu` LONGTEXT COMMENT 'education grade, qualification',
+  `staff_note` LONGTEXT,
+  `staff_inn` TINYTEXT,
+  `staff_snils` TINYTEXT,
+  `active` TINYINT(1) DEFAULT '1'
+)ENGINE=MyISAM COMMENT='' CHECKSUM=0 DELAY_KEY_WRITE=0 PACK_KEYS=0 MIN_ROWS=0 MAX_ROWS=0 ROW_FORMAT=DYNAMIC CHARACTER SET 'utf8'
+COLLATE 'utf8_general_ci';
+
+COMMIT;
+
+
+
+/* Data for the `staff` table  (Records 1 - 13) */
+
+INSERT INTO `staff` (`id`, `staff_f`, `staff_i`, `staff_o`, `staff_address`, `staff_birthdate`, `staff_staff`, `staff_phone`, `staff_email`, `staff_spec`, `staff_location`, `staff_passport`, `staff_pass_s`, `staff_pass_n`, `staff_pass_issuedate`, `staff_pass_issued`, `staff_edu`, `staff_note`, `staff_inn`, `staff_snils`, `active`) VALUES 
+  (1, 'Поляков', NULL, 'Денис Владимирович', 'м Площадь Мужества', NULL, 'Учредитель, врач', '8(911)7335395', 'doctordv@list.ru', NULL, 'м Площадь Мужества', NULL, NULL, NULL, NULL, NULL, 'высшее медицинское', NULL, NULL, NULL, 1),
+  (2, 'Мельник', NULL, 'Игорь Эдуардович', NULL, NULL, 'Учредитель', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1),
+  (3, 'Амельченко', NULL, 'Артем Андреевич', 'Центральный', '1986-07-25', 'Генеральный директор', '8(921)9463385', NULL, NULL, 'Центральный', 'паспорт 4005 №982728 выдан 41 о/м Фрунзенского р-на СПб 11.09.06', NULL, NULL, NULL, NULL, 'высшее профессиональное (специалист по АФК, магистр ФК); сертификат по ЛФК', NULL, NULL, NULL, 1),
+  (4, 'Адаменко', NULL, 'Николай Евгеньевич', 'м Площадь Ленина', NULL, 'Инструктор', '8(921)3096389', NULL, NULL, 'м Площадь Ленина', NULL, NULL, NULL, NULL, NULL, 'высшее профессиональное (спциалист по АФК)', NULL, NULL, NULL, 1),
+  (5, 'Гамаюнов', NULL, 'Михаил Борисович', 'м Площадь Мужества', NULL, 'Инструктор', '8(921)3440677', NULL, NULL, 'м Площадь Мужества', NULL, NULL, NULL, NULL, NULL, 'высшее профессиональное; учится в медицинском колледже', NULL, NULL, NULL, 1),
+  (6, 'Кавун', NULL, 'Юлия Геннадиевна', NULL, NULL, 'Инструктор, психолог', '8(905)2601110', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1),
+  (7, 'Мартынюк', NULL, 'Маргарита Даулетовна', 'Василеостровский', '1984-04-06', 'Методист, логопед', '8(906)2787301', 'aoifa@rambler.ru', 'дисфагия, афазия, дизартрия', 'Василеостровский', 'паспорт 4010 №234128, выдан ТП№3 ОУФМС РФ по СПб и ЛО в Адмиралтейском р-не СПб 04.05.11', NULL, NULL, NULL, NULL, 'высшее профессиональное ( специалист по АФК, логопед); сертификат по ЛФК', NULL, NULL, NULL, 1),
+  (8, 'Нагорная', NULL, 'Юлия Николаевна', NULL, NULL, 'Стажер-инструктор', '8(921)3139535', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1),
+  (9, 'Бахаудинов', NULL, 'Антон Сергеевич', 'Фрунзенский', '1993-01-12', 'Инструктор', '8(981)1502813', NULL, NULL, 'Фрунзенский', NULL, NULL, NULL, NULL, NULL, 'среднее профессиональное (учится в медицинском колледже)', NULL, NULL, NULL, 1),
+  (10, 'Хворов', NULL, 'Сергей Александрович', NULL, NULL, 'Стажер-инструктор', '8(952)2363219', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'среднее профессиональное (медицинский брат)', NULL, NULL, NULL, 1),
+  (11, 'Ненахов', NULL, 'Илья', 'м Пионерская', '1991-08-15', 'Стажер-инструктор', '8(911)1820224', NULL, NULL, 'м Пионерская', NULL, NULL, NULL, NULL, NULL, 'высшее профессиональное (бакалавр ФК, специалист по АФК)', NULL, NULL, NULL, 1),
+  (12, 'Елькин', NULL, 'Александр Владимирович', 'м Чкаловская', '1986-12-25', 'Стажер-инструктор', '8(921)8942110', NULL, NULL, 'м Чкаловская', NULL, NULL, NULL, NULL, NULL, 'высшее профессиональное (специалист по АФК)', NULL, NULL, NULL, 1),
+  (13, 'Арешко', NULL, 'Павел Викторович', 'м Пионерская', NULL, 'Инструктор, массажист', '8(960)2548640', NULL, NULL, 'м Пионерская', NULL, NULL, NULL, NULL, NULL, 'высшее медицинское', NULL, NULL, NULL, 1);
+
