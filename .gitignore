@@ -3,7 +3,6 @@
 api/*
 backup/*
 aes256/*
-application/*
 application/cache/*
 application/core/*
 application/errors/*

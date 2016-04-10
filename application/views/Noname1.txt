@@ -1,0 +1,467 @@
+# SQL Manager 2005 for MySQL 3.7.0.1
+# ---------------------------------------
+# Host     : localhost
+# Port     : 3306
+# Database : doctordv
+
+
+SET FOREIGN_KEY_CHECKS=0;
+
+DROP DATABASE IF EXISTS `doctordv`;
+
+CREATE DATABASE `doctordv`
+    CHARACTER SET 'utf8'
+    COLLATE 'utf8_general_ci';
+
+USE `doctordv`;
+
+#
+# Structure for the `выплаты поставщикам` table : 
+#
+
+DROP TABLE IF EXISTS `выплаты поставщикам`;
+
+CREATE TABLE `выплаты поставщикам` (
+  `Код` int(11) NOT NULL AUTO_INCREMENT,
+  `Поставщик` int(11) DEFAULT NULL,
+  `дата` datetime DEFAULT NULL,
+  `сумма` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Код`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+#
+# Data for the `выплаты поставщикам` table  (LIMIT 0,500)
+#
+
+INSERT INTO `выплаты поставщикам` (`Код`, `Поставщик`, `дата`, `сумма`) VALUES 
+  (1,NULL,NULL,NULL);
+
+COMMIT;
+
+#
+# Structure for the `заказ услуг` table : 
+#
+
+DROP TABLE IF EXISTS `заказ услуг`;
+
+CREATE TABLE `заказ услуг` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `номер доп соглашения` int(11) DEFAULT NULL,
+  `КодУслуги1` int(11) DEFAULT NULL,
+  `количество1` int(11) DEFAULT NULL,
+  `КодУслуги2` int(11) DEFAULT NULL,
+  `количество 2` int(11) DEFAULT NULL,
+  `КодУслуги3` int(11) DEFAULT NULL,
+  `количество 3` int(11) DEFAULT NULL,
+  `Код услуги 4` int(11) DEFAULT NULL,
+  `количество 4` int(11) DEFAULT NULL,
+  `ord_date` datetime DEFAULT NULL COMMENT 'date of service order',
+  `ord_actdate` datetime DEFAULT NULL COMMENT 'date of act conclusion',
+  `is_prepaid` tinyint(1) DEFAULT '0',
+  `is_paid` tinyint(1) DEFAULT '0' COMMENT 'payment closed',
+  PRIMARY KEY (`id`),
+  KEY `КодЗаказчика` (`client_id`),
+  KEY `номер доп соглашения` (`номер доп соглашения`)
+) ENGINE=MyISAM AUTO_INCREMENT=67 DEFAULT CHARSET=utf8;
+
+#
+# Data for the `заказ услуг` table  (LIMIT 0,500)
+#
+
+INSERT INTO `заказ услуг` (`id`, `client_id`, `номер доп соглашения`, `КодУслуги1`, `количество1`, `КодУслуги2`, `количество 2`, `КодУслуги3`, `количество 3`, `Код услуги 4`, `количество 4`, `ord_date`, `ord_actdate`, `is_prepaid`, `is_paid`) VALUES 
+  (41,1,0,1,12,2,10,14,2,9,23,'2013-11-26','2013-11-28',1,0),
+  (42,2,NULL,2,1,4,23,9,13,6,3,'2013-11-13','2013-12-27',0,0),
+  (43,1,1,3,5,NULL,NULL,NULL,NULL,NULL,NULL,'2013-11-30','2013-12-19',1,0),
+  (44,2,2,7,4,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,0),
+  (45,34,0,4,15,9,6,NULL,NULL,NULL,NULL,'2013-11-26',NULL,1,0),
+  (46,33,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0),
+  (47,33,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0),
+  (48,36,0,2,15,NULL,NULL,NULL,NULL,NULL,NULL,'2013-11-06','2013-11-23',0,1),
+  (49,36,1,2,5,NULL,NULL,NULL,NULL,NULL,NULL,'2013-11-23','2013-12-02',0,1),
+  (50,37,1,2,5,NULL,NULL,NULL,NULL,NULL,NULL,'2013-11-24','2013-12-02',1,0),
+  (51,39,0,16,5,NULL,NULL,NULL,NULL,NULL,NULL,'2013-11-27','2013-11-29',1,0),
+  (52,40,0,3,5,NULL,NULL,NULL,NULL,NULL,NULL,'2013-11-20','2013-11-27',0,0),
+  (53,40,1,3,5,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0),
+  (54,38,0,2,10,9,6,NULL,NULL,NULL,NULL,'2013-11-20',NULL,1,0),
+  (55,42,0,21,1,NULL,NULL,NULL,NULL,NULL,NULL,'2013-11-28',NULL,0,0),
+  (56,42,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0),
+  (57,43,NULL,21,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0),
+  (58,46,0,21,1,22,1,NULL,NULL,NULL,NULL,'2013-11-30',NULL,0,0),
+  (59,36,2,2,5,NULL,NULL,NULL,NULL,NULL,NULL,'2013-12-02','2013-12-08',1,1),
+  (60,47,NULL,22,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0),
+  (61,48,0,22,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0),
+  (62,49,0,22,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2013-12-03',NULL,0,0),
+  (63,51,0,28,1,NULL,NULL,NULL,NULL,NULL,NULL,'2013-12-09','2013-12-09',1,0),
+  (64,40,2,3,2,NULL,NULL,NULL,NULL,NULL,NULL,'2013-12-06','2013-12-10',0,0),
+  (65,52,0,3,10,NULL,NULL,NULL,NULL,NULL,NULL,'2013-12-11',NULL,1,0),
+  (66,53,0,1,10,NULL,NULL,NULL,NULL,NULL,NULL,'2013-12-13',NULL,1,0);
+
+COMMIT;
+
+#
+# Structure for the `ошибки вставки` table : 
+#
+
+DROP TABLE IF EXISTS `ошибки вставки`;
+
+CREATE TABLE `ошибки вставки` (
+  `Поле0` longtext
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+#
+# Data for the `ошибки вставки` table  (LIMIT 0,500)
+#
+
+INSERT INTO `ошибки вставки` (`Поле0`) VALUES 
+  ('СОГЛАСИЕ НА ОБРАБОТКУ ПЕРСОНАЛЬНЫХ ДАННЫХ'),
+  ('Я, _______________________________________________________________________,  '),
+  ('Фамилия, имя, отчество субъекта персональных данных'),
+  ('зарегистрированный (ая) по адресу: _____________________________________________________________________________'),
+  ('_____________________________________________________________________________,'),
+  ('документ, удостоверяющий личность: _____________________________________________________________________________'),
+  ('_____________________________________________________________________________,'),
+  ('                                                                        вид документа, № документа, когда и кем выдан'),
+  ('даю согласие на обработку моих персональных данных   ООО «БалтРеаТех».'),
+  ('Перечень персональных данных, на обработку которых дается согласие:'),
+  ('1.'),
+  ('2.'),
+  ('3.'),
+  ('4.'),
+  ('Перечень действий с персональными данными, на совершение которых дается согласие, общее описание используемых ООО «БалтРеаТех» способов обработки:'),
+  ('1.'),
+  ('2.'),
+  ('3.'),
+  ('Порядок отзыва настоящего согласия:  по личному заявлению субъекта персональных данных.'),
+  ('                                                                                                        «___» _____________ 20____');
+
+COMMIT;
+
+#
+# Structure for the `clients` table : 
+#
+
+DROP TABLE IF EXISTS `clients`;
+
+CREATE TABLE `clients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'client ID',
+  `cli_f` varchar(20) DEFAULT NULL COMMENT 'client family name',
+  `cli_i` tinytext COMMENT 'client name',
+  `cli_o` tinytext COMMENT 'client second name',
+  `cli_address` text COMMENT 'client''s postal address',
+  `pat_id` int(11) DEFAULT NULL COMMENT 'patient ID',
+  `cli_sib` varchar(30) DEFAULT NULL COMMENT 'client and patient are related as',
+  `cli_contract` int(11) DEFAULT NULL COMMENT 'contract number (or ID)',
+  `cli_contract_date` datetime DEFAULT NULL COMMENT 'contract date',
+  `start_date` datetime DEFAULT NULL COMMENT 'start date of contract/course',
+  `is_closed` tinyint(1) DEFAULT '0' COMMENT 'closed flag for contract/course',
+  `end_date` datetime DEFAULT NULL COMMENT 'end date for contract/course',
+  `cli_cphone` tinytext COMMENT 'client''s cellular phone',
+  `cli_hphone` tinytext COMMENT 'client''s home phone',
+  `cli_mail` varchar(255) DEFAULT NULL COMMENT 'client''s e-mail',
+  `cli_pass_s` varchar(8) DEFAULT NULL COMMENT 'client''s passport serial number',
+  `cli_pass_n` varchar(10) DEFAULT NULL COMMENT 'client''s passport number',
+  `cli_pass_issued` text COMMENT '"issued by" client''s passport field',
+  `cli_pass_issdate` datetime DEFAULT NULL COMMENT '"issue date" client''s passport field',
+  `инструктор/ массажист` varchar(255) DEFAULT NULL,
+  `центр/дом` varchar(255) DEFAULT '="центр\n"',
+  `cli_note` longtext,
+  `кто направил` int(11) DEFAULT NULL,
+  `Жалобы` longtext,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
+
+#
+# Data for the `clients` table  (LIMIT 0,500)
+#
+
+INSERT INTO `clients` (`id`, `cli_f`, `cli_i`, `cli_o`, `cli_address`, `pat_id`, `cli_sib`, `cli_contract`, `cli_contract_date`, `start_date`, `is_closed`, `end_date`, `cli_cphone`, `cli_hphone`, `cli_mail`, `cli_pass_s`, `cli_pass_n`, `cli_pass_issued`, `cli_pass_issdate`, `инструктор/ массажист`, `центр/дом`, `cli_note`, `кто направил`, `Жалобы`) VALUES 
+  (50,'Солдатова',NULL,NULL,'Луначарского 80 к 2 кв 111',NULL,NULL,NULL,NULL,NULL,0,NULL,'89062672628',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (51,'Муртазина','Ирина','Анатольевна',NULL,NULL,NULL,50,NULL,'2013-12-09',0,NULL,NULL,NULL,NULL,'402','426993',NULL,NULL,'Поляков','центр\r',NULL,NULL,NULL),
+  (52,'Селадьина','Татьяна','Петровна','Шостаковича 1/9 кв. 102',41,'жена',52,'2013-12-11','2013-12-16',0,NULL,'89213439160','5146097',NULL,'4002','66582','58 О/м Выборгского р-на СПб','2002-02-19','Ненахов','амбулатор',NULL,2,'фиксировано лев. Плечо, отведение отсутствует, поза стоя-не удерживает экстензию. Ходит сам с многоопор тростью.'),
+  (53,'Куклев','Андрей','Аркадьевич','Бухареская 39 -4-45',NULL,NULL,55,'2013-12-13','2013-12-16',0,NULL,NULL,NULL,NULL,'4007','17729','40 О/М Фрунзенского района','2006-11-08','Адаменко','амбулатор','ОНМК 2012',NULL,'Левосторонний гемипарез, высокая спастика (4-5 б)'),
+  (47,'Белых','Филипп','Михайлович','Витебский пр 87 к.3 15',36,NULL,47,'2013-12-02','2013-12-02',0,NULL,'89632444442',NULL,NULL,'4011','512133','49 о/м по СПб','2012-08-01','Теплов','центр\r',NULL,18,NULL),
+  (48,'Присяжная','Наталья','Владимировна',NULL,NULL,NULL,48,'2013-12-02','2013-12-02',0,NULL,'89112835621',NULL,NULL,'4007','132156','64 о/м','2007-02-13','Теплов','центр\r',NULL,NULL,NULL),
+  (49,'Алексеева','Ольга','Александровна','пр. Энгельса 121 кв 153',NULL,NULL,49,'2013-12-03','2013-12-03',0,NULL,NULL,'89213388024',NULL,'4007','460611','тп №13 отдела УФМС России','2008-05-16','Поляков','центр\r',NULL,NULL,NULL),
+  (46,'Швец','Светлана','Валерьевна','СПб ул. Шостаковича д. 5 кор. 2 кв 7',NULL,NULL,46,'2013-11-30','2013-11-30',0,NULL,'89112477794',NULL,'shvec-svetlana@mail.ru','5205','251245','УВД Октябрьского окр. Г. Омска','2006-02-02',NULL,'центр\r',NULL,18,'боли в шее.'),
+  (36,'Киселев','Юрий','Ефимович','СПб пр. Косыгина 26 к. 1 кв 20',NULL,NULL,40,'2013-11-06','2013-11-06',0,NULL,'89219947973',NULL,NULL,'4005','606863','13 О/м Красногвардейского р-на СПб','2005-04-17','Адаменко','амбулатор',NULL,NULL,NULL),
+  (37,'Логинов','Андрей','Викторович','СПб ул. Рузовская 9 кв.19',NULL,NULL,37,'2013-11-09','2013-11-11',0,NULL,NULL,NULL,NULL,'4000','537041','38 о/м Адмиралтейского р-на СПб',NULL,'Ненахов','амбулатор',NULL,NULL,NULL),
+  (38,'Бурыгин','Игорь','Сергеевич','СПб ул. Пионеров 16 кв.12',NULL,'сын',38,'2013-11-19','2013-11-20',0,NULL,'89219333144',NULL,NULL,'4007','293731','ТП №38 ОУФМС в Красносельском р-не СПб','2007-08-30','Елькин','амбулатор',NULL,NULL,NULL),
+  (39,'Амельченко','Артем','Андреевич','СПб ул Димитрова д. 7 кв 212',NULL,NULL,42,'2013-11-27','2013-11-27',0,NULL,'9463385',NULL,NULL,'4002','123654','19 О/м Кировского р-на','2003-12-18','Поляков','центр',NULL,NULL,NULL),
+  (40,'Сапегин','Сергей','Анатольевич','СПб. Пр. Просвещения 69 кв 161',NULL,NULL,43,'2013-11-20','2013-11-20',0,NULL,'89215911085',NULL,NULL,'4003','78177','17 о/м Калининского р-на СПб.','2002-10-31','Елькин','амбулатор',NULL,5,NULL),
+  (42,'Демченко','Вера','Артемовна','Тамбовская 33 кв 19',NULL,NULL,44,'2013-11-28','2013-11-28',0,NULL,'89052093502',NULL,NULL,'4005','488909','11 о\\м фрунз. Р-на Спб','2005-03-23',NULL,'центр\r',NULL,NULL,NULL),
+  (43,'Логинова','Оксана','Викторовна','Энергетиков 7 кв 39',NULL,NULL,45,NULL,'2013-11-28',0,NULL,'89312088769',NULL,NULL,'4106','950236','тп 112 отдела УФМС россии в кировском р-не','2007-09-12','Теплов','центр\r','боли между лопатками',NULL,NULL),
+  (44,'Мантлевич','Владимир','Михайлович','Северный 6 к.1',NULL,NULL,NULL,NULL,NULL,0,NULL,'89214491574','89117894621',NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (45,'Дмитриевский','Георгий','Игоревич','Загребский б-р 35/28 кв 15.',NULL,NULL,NULL,NULL,NULL,0,NULL,'89112452636',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (34,'Карло','Галина','Григорьевна','СПб Варшавская 61 кв 33',NULL,NULL,41,'2013-11-26','2013-11-27',0,NULL,'3750677',NULL,NULL,'4002','854997','12 о/м Московского р-на СПб','2002-07-30','Елькин','амбулатор',NULL,NULL,NULL),
+  (1,'Донец','Николай','Леонидович','Луначарского 80-212',38,NULL,30,'2012-12-12','2013-11-13',1,'2013-11-28','89219425815',NULL,NULL,'4005','340526','ОВД г.котласа Архангельской Области','2002-05-20','Амельченко','амбулатор','приоритетный',NULL,NULL),
+  (2,'Ким','Татьяна','Васильевна','Культуры',1,'сама',34,'2013-12-11','2013-11-27',1,'2013-11-30','+7 (931) 321 60 62',NULL,NULL,'4008','456217','ТП№9 ОУФМС Октябрьского р-на СПБ','2005-11-21','Мартынюк','амбулатор','Доп контакт: Виктор (муж Татьяны) 8 (911) 929 91 90',NULL,NULL),
+  (3,'Соколов',NULL,'Виктор Петрович',NULL,2,'муж',NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор','-',NULL,NULL),
+  (4,'Фурсова',NULL,'Татьяна Ильинична',NULL,4,'жена',NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (5,'Ромашенкова',NULL,'Тамара Васильевна',NULL,5,'жена',NULL,NULL,NULL,1,NULL,'8(921)0984293','2993912',NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (6,'Степанова','Елена','Вадимовна','Театральная пл.',6,'мать',NULL,NULL,NULL,0,NULL,'8(964)3793458',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (7,'Тихомирова',NULL,'Вера',NULL,7,'дочь',NULL,NULL,NULL,1,NULL,'8(904)6140388',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор','Доп контакт: бывшая жена пациента Мария Александровна 8(911)2393881',NULL,NULL),
+  (8,'Черная',NULL,'Ирина Феликсовна',NULL,9,'дочь',NULL,NULL,NULL,1,NULL,'8(911)9232392',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (9,'Поликарпова',NULL,'Людмила Лаврентьевна',NULL,11,'муж',NULL,NULL,NULL,1,NULL,'8 (911) 733 53 95',NULL,NULL,NULL,NULL,NULL,NULL,'Гамаюнов','амбулатор','Доп контакт: дочь Екатерина 8 (981) 716 16 39',NULL,NULL),
+  (10,'Михайлова',NULL,'Наталья Анатольевна',NULL,13,'дочь',NULL,NULL,NULL,1,NULL,'8 (921) 579 01 71',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (11,'Каган',NULL,'Николай Аронович',NULL,14,'муж',NULL,NULL,NULL,1,NULL,'8(911) 234 20 78',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (12,'Иванова',NULL,'Галина Александровна',NULL,15,'мать',NULL,NULL,NULL,1,NULL,'8(981)725 30 73',NULL,NULL,NULL,NULL,NULL,NULL,'Адаменко','амбулатор',NULL,NULL,NULL),
+  (13,'Тасюкова',NULL,'Татьяна Ивановна',NULL,16,'жена',NULL,NULL,NULL,1,NULL,'8(921)9213078',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (14,'Будылин',NULL,'Михаил Борисович',NULL,17,'сын',NULL,NULL,NULL,1,NULL,'8(921)3324129',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (15,'Вяльяк',NULL,'Ирина Александровна',NULL,18,'жена',NULL,NULL,NULL,1,NULL,'8(921)7429308',NULL,NULL,NULL,NULL,NULL,NULL,'Арешко','амбулатор',NULL,NULL,NULL),
+  (16,'Жиляева',NULL,'Аза Александровна',NULL,19,'жена',NULL,NULL,NULL,1,NULL,'8(911)7512154',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (17,'Дорофеева',NULL,'Ирина Вячеславовна',NULL,21,'дочь',NULL,NULL,NULL,1,NULL,'8(921)8736520',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (18,'Сумкина',NULL,'Елена Александровна',NULL,22,'дочь',NULL,NULL,NULL,1,NULL,'8(921)7550713',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (19,'Майская',NULL,'Юлия Валерьевна',NULL,23,'жена',NULL,NULL,NULL,1,NULL,'8(951)6794152',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (20,'Кулибанов',NULL,'Лев Сергеевич',NULL,24,'муж',NULL,NULL,NULL,1,NULL,'9460215',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор','место работы: Индустриальный пр 42 (код на КПП 4060)',NULL,NULL),
+  (21,'Прохоров',NULL,'Николай Иванович',NULL,25,'муж',NULL,NULL,NULL,1,NULL,NULL,'3334951',NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор','Доп контакт: Михаил Николаевич (сын) 8(921)4580547',NULL,NULL),
+  (22,'Гаврилов',NULL,'Андрей Васильевич',NULL,27,'отец',NULL,NULL,NULL,1,NULL,'8(911)2851408','4320080',NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор','Доп контакт: Наталья Васильевна (тетя Саши) 8(911)2226301',NULL,NULL),
+  (23,'Ботова',NULL,'Алла Михайловна',NULL,28,'дочь',NULL,NULL,NULL,1,NULL,'8(904)5150440',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (24,'Менько',NULL,'Елена Александровна',NULL,29,'дочь',NULL,NULL,NULL,1,NULL,'9488242',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (25,'Васильева',NULL,'Лидия Васильевна',NULL,26,'жена',NULL,NULL,NULL,0,NULL,'8(911)2485481','5839693',NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (26,'Алексеева',NULL,'Антонина Никифоровна',NULL,30,'своячница',NULL,NULL,NULL,1,NULL,'8(921)3245948',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (27,'Харменкова',NULL,'Наталия Петровна',NULL,31,'мать',NULL,NULL,NULL,0,NULL,'8(960)2772228',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (28,'Забирова',NULL,'Анастасия Алексеевна',NULL,32,'внучка',NULL,NULL,NULL,1,NULL,'89219924280',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (29,'Гончаренко',NULL,'Иван иосифович',NULL,33,'дочь',NULL,NULL,NULL,1,NULL,'89215918038',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор','дочь Светлана Ивановна.',NULL,NULL),
+  (30,'Яковлева',NULL,'Юлия',NULL,34,'жена',NULL,NULL,NULL,1,NULL,'89118378252','5506504',NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор','Постоплата пятница за неделю. Доп. Телефон 89117023116 (1-я жена, Яковлева Татьяна Михайловна)',NULL,NULL),
+  (31,'петрякова',NULL,'Жанна Константиновна',NULL,37,'жена',29,NULL,NULL,1,NULL,'89117504030',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL),
+  (32,'Логинов','Андрей','Викторович',NULL,39,NULL,36,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'амбулатор',NULL,NULL,NULL);
+
+COMMIT;
+
+#
+# Structure for the `contracts` table : 
+#
+
+DROP TABLE IF EXISTS `contracts`;
+
+CREATE TABLE `contracts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'contract ID',
+  `cont_number` tinytext COMMENT 'contract number',
+  `cont_date` datetime DEFAULT NULL COMMENT 'contract date',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+#
+# Structure for the `patients` table : 
+#
+
+DROP TABLE IF EXISTS `patients`;
+
+CREATE TABLE `patients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pat_fio` varchar(20) DEFAULT NULL,
+  `pat_i` tinytext,
+  `pat_o` tinytext,
+  `pat_io` varchar(30) DEFAULT NULL,
+  `pat_address` text,
+  `pat_clientid` int(11) DEFAULT NULL,
+  `pat_birthdate` datetime DEFAULT NULL,
+  `ВозрастПациента` longtext,
+  `pat_diagnosis` longtext COMMENT 'patient''s diagnosis',
+  `pat_info` longtext,
+  `pat_location` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
+
+#
+# Data for the `patients` table  (LIMIT 0,500)
+#
+
+INSERT INTO `patients` (`id`, `pat_fio`, `pat_i`, `pat_o`, `pat_io`, `pat_address`, `pat_clientid`, `pat_birthdate`, `ВозрастПациента`, `pat_diagnosis`, `pat_info`, `pat_location`) VALUES 
+  (1,'Ким','Светлана','Васильевна','Светлана Васильевна','ул Композиторов 4 кв 336',NULL,NULL,'70','ОНМК (2013)','Исполнитель Кавун',NULL),
+  (2,'Соколова',NULL,NULL,'Галина Прокофьевна','Гражданский пр 125 к2 кв 79',NULL,NULL,'72','ОНМК','Скончалась',NULL),
+  (3,'Ким ТВ',NULL,NULL,'Татьяна Васильевна','ул Композиторов 4 кв 336',NULL,NULL,'38','ДДЗП',NULL,NULL),
+  (4,'Фурсов ЛФ',NULL,NULL,'Леонид Федорович','Гражданский пр 15 к 1 кв 43',NULL,NULL,NULL,'ОНМК\r\nИБС, АКШ (2012)',NULL,NULL),
+  (5,'Ромашенков ЕБ',NULL,NULL,'Евгений Борисович','пр Науки 75 к3 кв 92',NULL,NULL,NULL,'ОНМК',NULL,NULL),
+  (6,'Степанов АЛ',NULL,NULL,'Александр Леонидович','Театральная пл 16 кв 29',NULL,NULL,'19','Перелом С6',NULL,NULL),
+  (7,'Тихомиров АЕ',NULL,NULL,'Андрей Евгеньевич','ул Димитрова 17 к1 кв 264',NULL,NULL,NULL,'ОНМК',NULL,NULL),
+  (8,'Игнаткова ЛВ',NULL,NULL,'Лариса Васильевна','ул Гастелло д 18 кв 50',NULL,NULL,NULL,'Перелом позвоночника (Т9).\r\nОстеомиелит. ХПН','Услуги приостановленны в связи с ухудшением состояния',NULL),
+  (9,'Черная МВ',NULL,NULL,'Маргарита Владимировна','пр Металлистов д 89 кв 71',NULL,NULL,'77','ОНМК от 25.12.12',NULL,NULL),
+  (10,'Шац СБ',NULL,NULL,'Сара Брониславовна','ул Моховая',NULL,NULL,NULL,'ДДЗП','Курс приостановлен в связи с ухудшением состояния',NULL),
+  (11,'Поликарпов ВМ',NULL,NULL,'Вячеслав Михайлович','пр. Науки д. 65 кв. 70',NULL,NULL,'60','ОНМК 28.03.13\r\nИБС, ПИКС (?) сост. п/ резекции желудка по поводу язвы. Правосторонний гемипарез, афазия',NULL,NULL),
+  (13,'Михайлова ТС',NULL,NULL,'Татьяна Сергеевна','ЛО, Гатчинский р-н, пос. Прибытково, ул. Пионеров 17',NULL,NULL,'70','ОНМК от 01.04.13','Курс окончен в связи с прогрессированием психоорганического синдрома',NULL),
+  (14,'Наумова ГА',NULL,NULL,'Галина Александровна','Купчинская ул 14 к1 кв 154',NULL,NULL,'71','ОНМК (2012)\r\nМА',NULL,NULL),
+  (15,'Иванов ЕГ',NULL,NULL,'Евгений Геннадьевич','Кронверкский пр 13 к 2 кв 18',NULL,NULL,'52 (18 мая)','ОНМК от 20.03.13',NULL,NULL),
+  (16,'Семенов АИ',NULL,NULL,'Анатолий Иванович','пр Королева д 27 к 2 кв 170',NULL,NULL,'72','Гемор инсульт от 10.03.13\r\nПИКС (?), СД 2, ОАСНК.\r\nПравосторонняя гемиплегия, гипестезия. Афазия, дисфагия.',NULL,NULL),
+  (17,'Будылина ВП',NULL,NULL,'Валентина Петровна','ул Тимуровская д 4 к 1 кв 306',NULL,NULL,'75','ОНМК от 02.04.13',NULL,NULL),
+  (18,'Вяльяк ЭЭ',NULL,NULL,'Эн Эдуардович','Ленинский пр д 119 кв 154',NULL,NULL,'76 (23 мая)','ОНМК от 08.12\r\nОАСНК\r\nПравосторонний гемипарез. Афазия',NULL,NULL),
+  (19,'Жиляев ВВ',NULL,NULL,'Валерий Викторович','Гражданский пр 130 к 1 кв 278',NULL,NULL,'73','ОНМК от 09.04.13\r\nМА\r\nЛевосторонний гемипарез. Дизартрия. Эмоц лабильность',NULL,NULL),
+  (20,'Кремлякова ГИ',NULL,NULL,'Галия Измайловна','ул Будапештская д 97 к 2 кв 84',NULL,NULL,NULL,'Сост. Посе удаления интрамедулярной опухоли TH 5. парапарез.',NULL,NULL),
+  (21,'Дорофеева МИ',NULL,NULL,'Мария Ивановна','пр Луначарского д 56 к 3 кв 65',NULL,NULL,'81 (1932)','ОНМК 31.05.2013.\r\nИБС, ГБ 3, АГ 3, СН 2 ФК. Пост форма ФП. Сост п/нефрэктомии (04) по пов новообразования. Хр калькулезный холицистит. СД2. ДЭ\r\nЛевосторонний гемипарез, гемигипестезия','Сын Вадим Вячеславович: 8 (921) 384 87 76',NULL),
+  (22,'Троянова ФФ',NULL,NULL,'Фаина Федоровна','Светлановский пр 99 к 1 кв 30',NULL,NULL,'74','ОНМК от 19.03.13\r\nИБС, ПИКС (?), ГБ 2, ФП (пост форма), гипотиреоз; нефроэктомия (2005).\r\nПравосторонний гемипарез. Афазия',NULL,NULL),
+  (23,'Майский АВ',NULL,NULL,'Александр Валерьевич','пр Солидарности д 3 к 2 кв 163',NULL,NULL,'48','ЧМТ\r\nДисфагия. Тотальная афазия.',NULL,NULL),
+  (24,'Кулибанова ЛД',NULL,NULL,'Лариса Дмитриевна',NULL,NULL,NULL,'62','ОНМК от 24.05.13',NULL,NULL),
+  (25,'Тубина ЛА',NULL,NULL,'Лидия Андреевна','ул Пулковская д 6 к 3 кв 57',NULL,NULL,'77','ОНМК (серия инсультов в 2011)\r\nИБС, СН 3 ФК, ДН; н/о опухоль почки, легких',NULL,NULL),
+  (26,'Васильев ВА',NULL,NULL,'Виктор Александрович','ул Латышских Стрелков д 9 к 2 кв 38',NULL,NULL,'70','ОНМК (апрель 2013)\r\nИБС, ПИКС (1978); миастения',NULL,NULL),
+  (27,'Гаврилов АА',NULL,NULL,'Александр Андреевич','пос. Репино, ул. 1-я Новая',NULL,NULL,'19','ОНМК от 25.05.13',NULL,NULL),
+  (28,'Пиколева ГВ',NULL,NULL,'Галина Васильевна',NULL,NULL,NULL,NULL,'ОНМК',NULL,NULL),
+  (29,'Шмуклер ИА',NULL,NULL,'Изольда Александровна','г. Пушкин бул А Толстого д 50 к 1 кв 94',NULL,NULL,'74 (18.12.38)','ОНМК от 04.06.2012\r\nИБС (безболевая ишемия). СН 2. ГБ 3.Тахикардия (пароксизмальная форма).\r\nСост п/нефрэктомии (98) по поводу пиелонефрита.  КПТИ по поводу менингеомы лев теменно-височной обл-ти (2003), радиохир  по поводу рецидива (2007).\r\nХолицистэктомия (2006). Б-нь Крона. Эутиреоз. Скользящая грыжа пищеводного отв диафрагмы. ДДЗП',NULL,NULL),
+  (30,'Алексеева ТА',NULL,NULL,'Тамара Александровна','ул Турку д 20 к 1 кв 508',NULL,NULL,'85 лет','Перелом лев б/б кости в н/3 со смещением; опер 14.06.13 (БИОС).\r\nИБС, СН 3 ФК, кардиосклероз. ГБ3, ЦВБ, ХНМК, ДЭ2. Тромбоз глубоких вен лев голени. Рецидив ТЭЛА мелких ветвей. Гипостатическая пневмония.\r\nНовообр в мочевом пузыре. Кисты лев почки. Уроинфекция.\r\nПролежень лев пяточной обл-ти.','сын Александр Владимирович;\r\nмуж Владимир Павлович',NULL),
+  (31,'Харменков ДН',NULL,NULL,'Данила Николаевич','Гражданский пр 105 к 1 кв 296',NULL,NULL,'29','Последствия ЧМТ (2012)',NULL,NULL),
+  (32,'Чернов ВА',NULL,NULL,'Владилен Алексеевич','ЦЗ',NULL,NULL,'74 года (3 фев 1939)','ОНМК (10.12.12)\r\nИБС, АКС, ГБ 3.\r\nХр панкреатит',NULL,NULL),
+  (33,'Гончаренко ИИ',NULL,NULL,'Иван Иосифович','Будапештская 4 кв 237',NULL,NULL,'77','ОНМК',NULL,NULL),
+  (34,'Яковлев ВВ',NULL,NULL,'Валентин Васильевич',NULL,NULL,NULL,'62','ОНМК по геморрагическому типу 27.07.2013 Пост.форма фибрилляции предсердий.',NULL,NULL),
+  (35,'Зеленцова НГ',NULL,NULL,'Нина Гордеевна','Малая карпатская д 23 к 1 кв 84',NULL,NULL,'64','ОНМК по ишемич типу 12.08.2013',NULL,NULL),
+  (36,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+  (37,'Петряков ВА',NULL,NULL,'Валентин Алексеевич','Софийская 22 кв.74 (97)',NULL,NULL,NULL,'повторный ОНМК ЛСМА последств ОНМК ВББ, Фибрилляция предсердий пост.ф.,',NULL,NULL),
+  (38,'Донец НЛ',NULL,NULL,'Николай Леонидович','СПБ Приморский пр. 155 кв 93',NULL,NULL,NULL,'ОНМК',NULL,NULL),
+  (39,'Логинов А.В.',NULL,NULL,'Андрей Викторович','ул. Рузовская д. 9 кв 31',NULL,NULL,NULL,NULL,NULL,NULL),
+  (40,'Киселев Ю.Е.',NULL,NULL,'Юрий Ефимович','пр. Косыгина 26 к.1 кв 20',NULL,NULL,NULL,'ОНМК',NULL,NULL),
+  (41,'морозов Д А',NULL,NULL,'Дмитрий Александрович',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
+COMMIT;
+
+#
+# Structure for the `services` table : 
+#
+
+DROP TABLE IF EXISTS `services`;
+
+CREATE TABLE `services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `serv_name` text COMMENT 'name for a service provided',
+  `serv_alias` tinytext COMMENT 'short description of the service',
+  `serv_desc` longtext COMMENT 'description for a service provided',
+  `serv_loc` enum('home','center') DEFAULT NULL,
+  `serv_price` text COMMENT 'price for a service measured unit',
+  `serv_price_trainee` tinytext COMMENT 'trainee price of service (per unit)',
+  `serv_price_instructor` tinytext,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+
+#
+# Data for the `services` table  (LIMIT 0,500)
+#
+
+INSERT INTO `services` (`id`, `serv_name`, `serv_alias`, `serv_desc`, `serv_loc`, `serv_price`, `serv_price_trainee`, `serv_price_instructor`) VALUES 
+  (1,'АФК 1 кс',NULL,'на дому','home','2200.0000',NULL,NULL),
+  (2,'АФК 2 кс',NULL,'на дому','home','2000.0000',NULL,NULL),
+  (3,'АФК 3 кс',NULL,'на дому','home','1800.0000',NULL,NULL),
+  (4,'АФК 4 кс',NULL,'на дому','home','1600.0000',NULL,NULL),
+  (5,'Логопедия',NULL,'на дому','home','1200.0000',NULL,NULL),
+  (6,'Психология',NULL,'на дому','home','1800.0000',NULL,NULL),
+  (7,'Тейпирование 300',NULL,'на дому материалом заказчика','home','300.0000',NULL,NULL),
+  (8,'Тейпирование 600',NULL,'на дому','home','600.0000',NULL,NULL),
+  (9,'Массаж общий',NULL,'на дому','home','1200.0000',NULL,NULL),
+  (10,'АФК 1 ЦЗ',NULL,'в центре здоровья','center','1400.0000',NULL,NULL),
+  (11,'АФК 2 ЦЗ',NULL,'в центре здоровья','center','1200.0000',NULL,NULL),
+  (12,'АФК 3 ЦЗ',NULL,'В центре здоровья','center','1000.0000',NULL,NULL),
+  (13,'АФК 4 ЦЗ',NULL,'В центре здоровья','center','800.0000',NULL,NULL),
+  (14,'Тейпирование 400 ЦЗ',NULL,'В центре здоровья материалом БРТ','center','400.0000',NULL,NULL),
+  (15,'Массаж Центр 30 мин',NULL,NULL,'center','900.0000',NULL,NULL),
+  (16,'массаж центр 60 мин',NULL,NULL,'center','1500.0000',NULL,NULL),
+  (17,'массаж центр 90 мин.',NULL,NULL,'center','1900.0000',NULL,NULL),
+  (18,'массаж центр 30 20 %',NULL,NULL,NULL,'780.0000',NULL,NULL),
+  (19,'массаж центр 60 20%',NULL,NULL,NULL,'1200.0000',NULL,NULL),
+  (20,'массаж центр 90 20%',NULL,NULL,NULL,'1440.0000',NULL,NULL),
+  (21,'массаж центр акц. 30',NULL,NULL,NULL,'441.0000',NULL,NULL),
+  (22,'массаж центр акц 60',NULL,NULL,NULL,'735.0000',NULL,NULL),
+  (23,'массаж центр акц 90',NULL,NULL,NULL,'931.0000',NULL,NULL),
+  (25,'экзарта центр',NULL,NULL,NULL,'800.0000',NULL,NULL),
+  (26,'кинезиотейпирование',NULL,NULL,NULL,'500.0000',NULL,NULL),
+  (27,'экзарта центр акц',NULL,NULL,NULL,'392.0000',NULL,NULL),
+  (28,'кинезиотейпир-е акц',NULL,NULL,NULL,'245.0000',NULL,NULL);
+
+COMMIT;
+
+#
+# Structure for the `staff` table : 
+#
+
+DROP TABLE IF EXISTS `staff`;
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'staff unit ID',
+  `staff_f` varchar(30) DEFAULT NULL,
+  `staff_i` tinytext,
+  `staff_o` tinytext,
+  `staff_address` text,
+  `staff_birthdate` datetime DEFAULT NULL,
+  `staff_staff` tinytext,
+  `staff_phone` tinytext,
+  `staff_email` text,
+  `staff_spec` text COMMENT 'specialisation',
+  `staff_location` text,
+  `staff_passport` longtext COMMENT 'AES-encode',
+  `staff_pass_s` tinytext,
+  `staff_pass_n` tinytext,
+  `staff_pass_issuedate` datetime DEFAULT NULL,
+  `staff_pass_issued` text,
+  `staff_edu` longtext COMMENT 'education grade, qualification',
+  `staff_note` longtext,
+  `staff_inn` tinytext,
+  `staff_snils` tinytext,
+  `active` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#
+# Data for the `staff` table  (LIMIT 0,500)
+#
+
+INSERT INTO `staff` (`id`, `staff_f`, `staff_i`, `staff_o`, `staff_address`, `staff_birthdate`, `staff_staff`, `staff_phone`, `staff_email`, `staff_spec`, `staff_location`, `staff_passport`, `staff_pass_s`, `staff_pass_n`, `staff_pass_issuedate`, `staff_pass_issued`, `staff_edu`, `staff_note`, `staff_inn`, `staff_snils`, `active`) VALUES 
+  (1,'Поляков',NULL,'Денис Владимирович','м Площадь Мужества',NULL,'Учредитель, врач','8(911)7335395','doctordv@list.ru',NULL,'м Площадь Мужества',NULL,NULL,NULL,NULL,NULL,'высшее медицинское',NULL,NULL,NULL,1),
+  (2,'Мельник',NULL,'Игорь Эдуардович',NULL,NULL,'Учредитель',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+  (3,'Амельченко',NULL,'Артем Андреевич','Центральный','1986-07-25','Генеральный директор','8(921)9463385',NULL,NULL,'Центральный','паспорт 4005 №982728 выдан 41 о/м Фрунзенского р-на СПб 11.09.06',NULL,NULL,NULL,NULL,'высшее профессиональное (специалист по АФК, магистр ФК); сертификат по ЛФК',NULL,NULL,NULL,1),
+  (4,'Адаменко',NULL,'Николай Евгеньевич','м Площадь Ленина',NULL,'Инструктор','8(921)3096389',NULL,NULL,'м Площадь Ленина',NULL,NULL,NULL,NULL,NULL,'высшее профессиональное (спциалист по АФК)',NULL,NULL,NULL,1),
+  (5,'Гамаюнов',NULL,'Михаил Борисович','м Площадь Мужества',NULL,'Инструктор','8(921)3440677',NULL,NULL,'м Площадь Мужества',NULL,NULL,NULL,NULL,NULL,'высшее профессиональное; учится в медицинском колледже',NULL,NULL,NULL,1),
+  (6,'Кавун',NULL,'Юлия Геннадиевна',NULL,NULL,'Инструктор, психолог','8(905)2601110',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+  (7,'Мартынюк',NULL,'Маргарита Даулетовна','Василеостровский','1984-04-06','Методист, логопед','8(906)2787301','aoifa@rambler.ru','дисфагия, афазия, дизартрия','Василеостровский','паспорт 4010 №234128, выдан ТП№3 ОУФМС РФ по СПб и ЛО в Адмиралтейском р-не СПб 04.05.11',NULL,NULL,NULL,NULL,'высшее профессиональное ( специалист по АФК, логопед); сертификат по ЛФК',NULL,NULL,NULL,1),
+  (8,'Нагорная',NULL,'Юлия Николаевна',NULL,NULL,'Стажер-инструктор','8(921)3139535',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+  (9,'Бахаудинов',NULL,'Антон Сергеевич','Фрунзенский','1993-01-12','Инструктор','8(981)1502813',NULL,NULL,'Фрунзенский',NULL,NULL,NULL,NULL,NULL,'среднее профессиональное (учится в медицинском колледже)',NULL,NULL,NULL,1),
+  (10,'Хворов',NULL,'Сергей Александрович',NULL,NULL,'Стажер-инструктор','8(952)2363219',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'среднее профессиональное (медицинский брат)',NULL,NULL,NULL,1),
+  (11,'Ненахов',NULL,'Илья','м Пионерская','1991-08-15','Стажер-инструктор','8(911)1820224',NULL,NULL,'м Пионерская',NULL,NULL,NULL,NULL,NULL,'высшее профессиональное (бакалавр ФК, специалист по АФК)',NULL,NULL,NULL,1),
+  (12,'Елькин',NULL,'Александр Владимирович','м Чкаловская','1986-12-25','Стажер-инструктор','8(921)8942110',NULL,NULL,'м Чкаловская',NULL,NULL,NULL,NULL,NULL,'высшее профессиональное (специалист по АФК)',NULL,NULL,NULL,1),
+  (13,'Арешко',NULL,'Павел Викторович','м Пионерская',NULL,'Инструктор, массажист','8(960)2548640',NULL,NULL,'м Пионерская',NULL,NULL,NULL,NULL,NULL,'высшее медицинское',NULL,NULL,NULL,1);
+
+COMMIT;
+
+#
+# Structure for the `suppliers` table : 
+#
+
+DROP TABLE IF EXISTS `suppliers`;
+
+CREATE TABLE `suppliers` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT COMMENT 'supplier_id',
+  `supp_orgname` text COMMENT 'supplier organization name',
+  `supp_f` tinytext COMMENT 'supplier family name',
+  `supp_i` tinytext COMMENT 'supplier name',
+  `supp_o` tinytext COMMENT 'supplier second name',
+  `supp_staff` tinytext COMMENT 'supplier staff',
+  `supp_phone` tinytext COMMENT 'supplier phone number',
+  `supp_email` longtext COMMENT 'supplier e-mail address',
+  `supp_clients` longtext,
+  `supp_notes` longtext,
+  `supp_address` text,
+  PRIMARY KEY (`sid`)
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+
+#
+# Data for the `suppliers` table  (LIMIT 0,500)
+#
+
+INSERT INTO `suppliers` (`sid`, `supp_orgname`, `supp_f`, `supp_i`, `supp_o`, `supp_staff`, `supp_phone`, `supp_email`, `supp_clients`, `supp_notes`, `supp_address`) VALUES 
+  (20,'ГБ №3','Гаврилов','Дмитрий','Александрович','невролог','89516838391','DocGavrilov@yandex.ru','',NULL,NULL),
+  (1,'ГБ №28','Шварцман','Яна','Леонидовна','невролог','89217979420',NULL,'15',NULL,NULL),
+  (2,'3 ГБ','Полякова АВ','Александра','Викторовна','невролог','89214025975',NULL,'',NULL,NULL),
+  (3,'александровская ГБ','Кудлачев','Андриан','Владимирович','нейрохирург','89602610608',NULL,'',NULL,NULL),
+  (4,'Александровская ГБ','Васильев','Андрей','Михайлович',NULL,NULL,NULL,'',NULL,NULL),
+  (5,'3 ГБ','Мирзоева','Вероника',NULL,'невролог','89312023501',NULL,'40',NULL,NULL),
+  (6,'Александровская ГБ','Хохленкова','Валерия',NULL,'нейрохирург','89119215500',NULL,'',NULL,NULL),
+  (7,'ИП Мустафаев','Мустафаев','Юрий','Александрович',NULL,'89219944483',NULL,'',NULL,NULL),
+  (8,'Александровская ГБ',NULL,'Марина','Олеговна','нейрохирург',NULL,NULL,'19',NULL,NULL),
+  (9,'ГБ№3','Куркова','Алла','Владимировна','невролог',NULL,NULL,'',NULL,NULL),
+  (10,NULL,'Поляков','Денис','Владимирович',NULL,'89052164714',NULL,'23',NULL,NULL),
+  (11,NULL,'Амельченко АА','Артём','Андреевич',NULL,'9463385',NULL,'',NULL,NULL),
+  (12,NULL,'Камаева ОВ',NULL,'Ольга Викторовна',NULL,NULL,NULL,'',NULL,NULL),
+  (13,'клиника Медем','Борисов','Андрей','Валентинович','невролог','89217472191',NULL,'20;30;37;38',NULL,NULL),
+  (14,NULL,'Кожевин АА',NULL,NULL,NULL,NULL,NULL,'26',NULL,NULL),
+  (15,NULL,'Сайт БалтРеаТех',NULL,NULL,NULL,NULL,NULL,'',NULL,NULL),
+  (16,NULL,'Сайты партнеров',NULL,NULL,NULL,NULL,NULL,'',NULL,NULL),
+  (17,NULL,'группа Вконтакте',NULL,NULL,NULL,NULL,NULL,'',NULL,NULL),
+  (18,'акция БРТ','акция',NULL,NULL,NULL,NULL,NULL,'46',NULL,NULL),
+  (19,'другое','другое',NULL,NULL,NULL,NULL,NULL,'',NULL,NULL);
+
+COMMIT;
