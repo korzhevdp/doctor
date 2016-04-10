@@ -137,8 +137,8 @@ class Refs extends CI_Controller {
 	}
 
 	public function supp_edit($id = 1){
-		array_push($this->bc, array("Поставщики", "/refs/staff"));
-		array_push($this->bc, array("Редактирование поставщика", "/refs/staff_edit"));
+		array_push($this->bc, array("Поставщики", "/refs/suppliers"));
+		array_push($this->bc, array("Редактирование поставщика", "/refs/supp_edit"));
 		$output = array(
 			'menu' => $this->load->view('menu', array(), true),
 			'content' => $this->refmodel->supp_edit($id),

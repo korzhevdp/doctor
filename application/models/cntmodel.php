@@ -6,7 +6,6 @@ class Cntmodel extends CI_Model{
 	}
 
 	public function cnt_list_get($cli = 0, $pat = 0){
-		$act = array();
 		$output = array();
 		$output2 = array();
 		$cont_serv = array();
@@ -70,11 +69,12 @@ class Cntmodel extends CI_Model{
 		}else{
 			array_push($output, '<tr><td colspan="6"><h4>Данные о контрактах не найдены.<br><a href="#" class="contAdder">Создайте хотя бы один</a> и выберите оказываемые по нему услуги.</h4>');
 		}
-
-		$act['table'] = implode($output, "\n");
-		$act['tableinactive'] = implode($output2, "\n");
-		$act['cstrict'] = $cli;
-		$act['pstrict'] = $pat;
+		$act = array(
+			'table'         => implode($output, "\n"),
+			'tableinactive' => implode($output2, "\n"),
+			'cstrict'       => $cli,
+			'pstrict'       => $pat
+		);
 		return $this->load->view('proc/contracts', $act, true);
 	}
 

@@ -6,13 +6,13 @@
 		</small>
 	</td>
 	<td>
-		<a href="/refs/clients#c<?=$clid?>" target="_blank"><?=$cli_fio;?></a><br>
+		<a href="/refs/client_edit/<?=$clid?>" target="_blank"><?=$cli_fio;?></a><br>
 		адрес: <?=$cli_address;?><br>
 		моб.: <?=$cli_cphone;?><br>
 		дом.: <?=$cli_hphone;?>
 	</td>
 	<td>
-		<span title="<?=$pat_diagnosis?>"><a href="/refs/patients#p<?=$patid?>" target="_blank"><?=$pat_fio?></a>, <?=$pat_age?> лет</span><br>
+		<span title="<?=$pat_diagnosis;?>"><a href="/refs/pat_edit/<?=$patid;?>" target="_blank"><?=$pat_fio;?></a>, <?=$pat_age;?> <?=($pat_age > 200) ? "г.р." : "лет";?></span><br>
 	</td>
 
 	<td>

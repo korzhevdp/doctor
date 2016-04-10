@@ -6,12 +6,11 @@
 		<th>Адрес</th>
 		<th style="width:75px;">Телефон / Email</th>
 		<th style="width:150px;">Счёт</th>
-		<th style="width:50px;">Ред.</th>
 	</tr>
 	<?=$table?>
 </table>
 
-<div class="modal hide" id="suppEditor" style="width:640px;">
+<!-- <div class="modal hide" id="suppEditor" style="width:640px;">
 	<div class="modal-header" style="cursor:move;background-color: #d6d6d6">
 		<button type="button" class="close" data-dismiss="modal"><i class="icon-remove"></i></button>
 		<h4><span id="editorHeader">Редактирование данных поставщика</span>&nbsp;&nbsp;&nbsp;<button id="suppActivator" class="btn btn-mini btn-warning">Исключить</button></h4>
@@ -88,10 +87,11 @@
 		<h4>Карточка поставщика</h4>
 	</div>
 	<div class="modal-body" id="suppDataText" style="height:460px;"></div>
-</div>
+</div> -->
 
 <script type="text/javascript">
 <!--
+	/*
 	$(".modal").modal({show: 0});
 
 	$(".suppEdit").click(function(event){
@@ -132,7 +132,7 @@
 		});
 		event.stopPropagation();
 	});
-
+	
 	$("#suppAddNew").click(function(event){
 		$("#suppDataForm input").each(function(){
 			$(this).val("");
@@ -143,7 +143,7 @@
 		$("#suppDataSave").html("Добавить");
 		$("#suppEditor").modal("show");
 	});
-
+	*/
 	function deactivate_supp(){
 		suppid = $("#suppID").val();
 		$.ajax({
@@ -173,7 +173,7 @@
 			}
 		});
 	}
-
+	/*
 	$(".supprow").click(function(){
 		var suppid = $(this).parent().attr("ref");
 		$.ajax({
@@ -196,7 +196,7 @@
 			}
 		});
 	});
-
+	*/
 	$("#suppDataSave").click(function(){
 		var good = 1;
 		$(".withCal").css('color', 'black');

@@ -20,9 +20,10 @@ class Payments extends CI_Controller {
 	}
 
 	public function moneyflow($client_id = 0){
-		$output = array();
-		$output['menu'] = $this->load->view('menu', $output, true);
-		$output['content'] = $this->shedmodel->payment_table_get($client_id);
+		$output = array(
+			'menu'    => $this->load->view('menu', array(), true),
+			'content' => $this->shedmodel->payment_table_get($client_id)
+		);
 		$this->load->view('view', $output);
 	}
 

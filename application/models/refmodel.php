@@ -359,15 +359,12 @@ class Refmodel extends CI_Model{
 			foreach($result->result() as $row){
 				$class = ($row->active) ? "" : " error";
 				$string = '<tr class="'.$class.'" ref="'.$row->sid.'" title="Поставщики">
-					<td class="supprow"><a name="s'.$row->sid.'"></a>'.$row->fio.'<br><small class="muted">'.$row->supp_orgname.'</small></td>
+					<td class="supprow"><a href="/refs/supp_edit/'.$row->sid.'">'.$row->fio.'</a><br><small class="muted">'.$row->supp_orgname.'</small></td>
 					<td class="supprow">'.$row->supp_staff.'</td>
 					<td class="supprow">'.$row->supp_address.'</td>
 					<td class="supprow">'.$row->supp_phone.'<br>'.$row->supp_email.'</td>
 					<td style="vertical-align:middle;text-align:center;">
 					<a href="/refs/suppliers_billing/'.$row->sid.'" class="btn btn-primary btn-mini" title="Детализация счёта поставщика"><i class="icon-signal icon-white"></i> Детализация счёта</a>
-					</td>
-					<td style="vertical-align:middle;text-align:center;">
-					<a class="btn btn-success btn-mini" href="/refs/supp_edit/'.$row->sid.'" title="Редактировать данные"><i class="icon-edit icon-white"></i></a>
 					</td>
 				</tr>';
 				array_push($output, $string);

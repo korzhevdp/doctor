@@ -163,8 +163,8 @@
 <script type="text/javascript">
 <!--
 	$(".modal").modal({show: 0});
-
-	$(".patEdit").click(function(event){
+	
+	$("patEdit").click(function(event){
 		var patid = $(this).attr("ref");
 		$("#patID").val(patid);
 		$.ajax({
@@ -241,10 +241,6 @@
 		event.stopPropagation();
 	});
 
-
-
-
-
 	function deactivate_pat(){
 		patid = $("#patID").val();
 		$.ajax({
@@ -320,7 +316,8 @@
 		}
 	});
 
-	// ############ функции показа карточек участников процесса
+	// ############ функции показа карточек участников процесса -- deprecated!!!
+	/*
 	$(".patrow").click(function(){
 		var patid = $(this).attr("ref");
 		$.ajax({
@@ -370,7 +367,7 @@
 			}
 		});
 	});
-
+	
 	$(".supprow").click(function(){
 		var suppid = $(this).attr("ref");
 		if(suppid == "0"){
@@ -397,6 +394,7 @@
 			}
 		});
 	});
+	*/
 	// ############ END функции показа карточек участников процесса
 
 

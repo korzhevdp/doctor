@@ -24,8 +24,8 @@ class Toolmodel extends CI_Model{
 		$size = (sizeof($src) - 1);
 		foreach($src as $key=>$val){
 			$string = ($key < $size)
-				? '<li><a href="'.$val[1].'">'.$val[0].'</a> <span class="divider">/</span></li>'
-				: '<li class="active">'.$val[0].'</li>' ;
+				? '<li><a href="'.$val[1].'" class="muted">'.$val[0].'</a> <span class="divider">/</span></li>'
+				: '<li class="active"><a href="#">'.$val[0].'</a></li>' ;
 			array_push($output, $string);
 		}
 		return '<ul class="breadcrumb">'.implode($output, "\n").'</ul>';
@@ -77,7 +77,7 @@ class Toolmodel extends CI_Model{
 	public function test_pass($password="12345678"){
 		$file = file_get_contents("/var/www/html/doctordv/aes256/checkfile.aes256");
 		$dec_key = $password.$this->config->item('encryption_key');
-		if($this->encrypt->decode($file, $dec_key) == "Everything is OK!"){
+		if($this->encrypt->decode($file, $dec_key) === "Everything is OK!"){
 			print "ssss";
 			return true;
 		}
@@ -95,7 +95,7 @@ class Toolmodel extends CI_Model{
 		// собираем ключ:
 		$dec_key = $master_password.$this->config->item('encryption_key');
 		// тест на чек-файле
-		if($this->encrypt->decode($checkfile, $dec_key) == "Everything is OK!"){
+		if($this->encrypt->decode($checkfile, $dec_key) === "Everything is OK!"){
 			// расшифровываем страшную строку суперключа и тут же пакуем её обратно с пользовательским ключом
 			// читаем файл:
 			$keyfile = file_get_contents("/var/www/html/doctordv/aes256/keyfile.aes256");
