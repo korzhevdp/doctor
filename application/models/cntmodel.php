@@ -108,7 +108,7 @@ class Cntmodel extends CI_Model{
 		$dateend      = strlen($this->input->post("dateend"))   ? implode(array_reverse(explode(".", $this->input->post("dateend",   true))), "-") : "0000-00-00";
 		$servstart    = strlen($this->input->post("servstart")) ? implode(array_reverse(explode(".", $this->input->post("servstart", true))), "-") : date("Y-m-d");
 		$shedule_corr = array();
-		$sdate        = explode("-", $servstart);
+		//$sdate        = explode("-", $servstart);
 		//$servstart_wd = date('w', mktime(0, 0, 0, $sdate[1], $sdate[2], $sdate[0]));
 		//
 		//$wd = ($this->input->post("wd")) ? 0 : 1 ;
@@ -494,7 +494,6 @@ class Cntmodel extends CI_Model{
 	}
 
 	public function cnt_initdata_get() {
-		$output = array();
 		$clients = array('<option value="0" title="Выберите клиента">Выберите клиента</option>');
 		$services = array('<option value="0" title="Выберите услугу">Выберите услугу</option>');
 		$result = $this->db->query("SELECT
@@ -793,56 +792,50 @@ class Cntmodel extends CI_Model{
 
 	// sheduler now used:
 	public function shedule_calc2($startdate=0, $days=array(), $rounds=1){
-		$output  = array();
+		$output  = array($days);
 		//print implode($days, ", ")."<br>";
 		//два режима работы - вставка услуги на единственный день и вставка услуги по опорному графику по дням недели
-		if($rounds == 1 && !is_array($days)){
-			//услуга на единственный день возвращаем массив из одного элемента - даты в формате ГГГГ-ММ-ДД
-			$output = array($days);
-		} else {
+		if($rounds !== 1 && is_array($days)){
 			// аварийная заглушка на случай отсутствия начальной даты.
 			if(!$startdate){
 				return array("0000-00-00");
 			}
 			// вставка услуги на дни недели из опорного графика
-
 			$date    = explode('-', $startdate);
 			$year    = $date[0];
 			$month   = $date[1];
 			$day     = $date[2];
-			//$wd_corr = 0;
 			$init_wd = date("w", mktime(0, 0, 0, $month , $day, $year));
 			// корректировка начального дня на график этой конкретной услуги
 			foreach ($days as $val) {
-				if ($init_wd > $val) {
-					continue;
-				} else {
+				if ($init_wd <= $val) {
 					$day += ($val - $init_wd);
 					$init_wd = $val;
 					break;
 				}
+				continue;
 			}
 			// корректировка произведена
-			$m = 0; // маркер холостого хода и счётчик недель
+			$markerWT = 0; // маркер холостого хода и счётчик недель
 			while (sizeof($output) < $rounds) {
-				foreach($days as $val){
-					if(!$m){ // холостой ход
-						if($init_wd < $val){
-							continue; // если рано - то пропуск цикла
-						}else{
-							$m++; // учётная неделя запущена
+				foreach ($days as $val) {
+					if(!$markerWT){ // холостой ход
+						if ($init_wd >= $val){
+							$markerWT++;
+							
 						}
+						continue; // если рано - то пропуск цикла
 					}
-					$daydiff = (($m-1) * 7) + $day + $val - 1;
+					$daydiff = (($markerWT-1) * 7) + $day + $val - 1;
 					// формируем дату и вставляем её в сгенерированный график ГГГШ-ММ-ДД
 					$target = mktime(0, 0, 0, $month , $daydiff, $year);
 					array_push($output, date('Y-m-d', $target));
 					// проверяем: не слишком ли много насчитали услуг. внутренний цикл не знает их числа
-					if(sizeof($output) == $rounds){
+					if (sizeof($output) === $rounds) {
 						break; // хватит. попробуй начать цикл заново.
 					}
 				}
-				$m++;
+				$markerWT++;
 			}
 		}
 		//print_r($output);
