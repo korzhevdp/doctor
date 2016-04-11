@@ -21,7 +21,4 @@
 	<td style="text-align:center;vertical-align:middle;cursor:pointer;" class="sheduleEdit">
 		<img src="/images/barchart.png" width="32" height="32" border="0" alt="">
 	</td>
-	<td style="text-align:center;vertical-align:middle">
-		<a class="btn btn-success btn-mini" href="/contracts/show/<?=$contid?>" title="Редактировать данные контракта"><i class="icon-edit icon-white"></i></a>
-	</td>
 </tr>

@@ -1,5 +1,4 @@
 <h3 style="margin-bottom:20px;">Реестр контрактов&nbsp;&nbsp;&nbsp;<small>текущие контракты и история</small></h3> 
-<!-- <button type="button" class="btn btn-warning pull-right contAdder" style="margin-right:10px;">Добавить контракт</button> -->
 
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#tab1" id="htab1" data-toggle="tab">Текущие контракты</a></li>
@@ -15,7 +14,6 @@
 			<th>Пациент</th>
 			<th>Услуги по контракту</th>
 			<th>График услуг</th>
-			<th>Ред.</th>
 			</tr>
 		<?=$table?>
 		</table>
@@ -28,7 +26,6 @@
 			<th>Пациент</th>
 			<th>Услуги по контракту</th>
 			<th>График услуг</th>
-			<th>Ред.</th>
 			</tr>
 		<?=$tableinactive?>
 		</table>

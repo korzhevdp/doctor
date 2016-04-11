@@ -8,7 +8,6 @@ class Contracts extends CI_Controller {
 		if(!$this->session->userdata('userid')){
 			$this->load->helper("url");
 			redirect("login");
-			exit;
 		}
 		$this->load->model("cntmodel");
 		$this->load->model("toolmodel");
@@ -16,28 +15,24 @@ class Contracts extends CI_Controller {
 
 	public $bc = array(array("Реестр контрактов", "/contracts"));
 
-	public function index(){
+	public function index() {
 		$this->show();
 	}
 
-	public function add(){
-		$output = array();
-		$output['menu'] = $this->load->view('menu', $output, true);
-		$output['content'] = $this->cntmodel->addnew();
+	public function add() {
+		$output = array(
+			'menu'    => $this->load->view('menu', array(), true),
+			'content' => $this->cntmodel->addnew()
+		);
 		$this->load->view('view', $output);
 	}
 
-	public function actsw(){
-		$result = $this->db->query("UPDATE
-		`contracts`
-		SET
-		`contracts`.active = IF(`contracts`.active = 1, 0 , 1)
-		WHERE
-		`contracts`.`id` = ?" , array($this->input->post("cnt")));
+	public function actsw() {
+		$this->db->query("UPDATE `contracts` SET `contracts`.active = IF(`contracts`.active = 1, 0 , 1) WHERE `contracts`.`id` = ?" , array($this->input->post("cnt")));
 		print "done";
 	}
 
-	public function show($cid=0){
+	public function show($cid=0) {
 		($cid) ? array_push($this->bc, array("Просмотр контракта", "/refs/staff")) : array_push($this->bc, array("Список контрактов", "#"));
 		$output = array(
 			'menu'		=> $this->load->view('menu', array(), true),
@@ -47,23 +42,23 @@ class Contracts extends CI_Controller {
 		$this->load->view('view', $output);
 	}
 
-	public function cnt_save(){
+	public function cnt_save() {
 		$this->cntmodel->cnt_save();
 	}
 
-	public function cnt_initdata_get(){
+	public function cnt_initdata_get() {
 		print $this->cntmodel->cnt_initdata_get();
 	}
 
-	public function rel_pats_get(){
+	public function rel_pats_get() {
 		print $this->cntmodel->rel_pats_get();
 	}
 
-	public function cnt_data_get($cnt=0){
+	public function cnt_data_get($cnt=0) {
 		print $this->cntmodel->cnt_data_get($cnt);
 	}
 
-	public function underwrite(){
+	public function underwrite() {
 		print $this->cntmodel->underwrite();
 	}
 
