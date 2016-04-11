@@ -78,15 +78,15 @@ class Cntmodel extends CI_Model{
 		return $this->load->view('proc/contracts', $act, true);
 	}
 
-	public function cnt_get($cid){
-		$act = array('cid' => $cid);
-		$output = array();
+	public function cnt_get($contractID){
+		$act       = array('cid' => $contractID);
+		$output    = array();
 		$cont_serv = array();
 		return $this->load->view('proc/contractdata', $act, true);
 	}
 
 	public function cnt_save(){
-		$this->output->enable_profiler(TRUE);
+		//$this->output->enable_profiler(TRUE);
 		//return false;
 		// подготовка данных
 		$cID          = $this->input->post("cID", true);
@@ -175,8 +175,8 @@ class Cntmodel extends CI_Model{
 							// ВНИМАНИЕ НЕОБХОДИМ НОВЫЙ КАЛЬКУЛЯТОР ГРАФИКА
 							//$shedule = $this->shedule_calc($servstart, $row->bas_period, $row->bas_num, $wd);
 
-// сюда приходит, например 4  и что с ней делать? даты ведь нет и расчёт тоже невозможен.
-// как вариант - проверить basdays  на формат даты, но это малопродуктивно или нет?
+							// сюда приходит, например 4  и что с ней делать? даты ведь нет и расчёт тоже невозможен.
+							// как вариант - проверить basdays  на формат даты, но это малопродуктивно или нет?
 
 
 							$basdays = ($row->bas_num == 1 && preg_match("/^\d\d\d\d\-\d\d\-\d\d$/", $row->bas_days)) 
@@ -389,13 +389,13 @@ class Cntmodel extends CI_Model{
 		//redirect("contracts/show/".$cID);
 	}
 
-	public function cnt_item_get($id = 0){
+	public function cnt_item_get($contractID = 0){
 		//$this->output->enable_profiler(TRUE);
-		$id = ($this->input->post("item")) ? $this->input->post("item") : $id;
-		if(!$id){
+		$contractID = ($this->input->post("item")) ? $this->input->post("item") : $contractID;
+		if (!$contractID) {
 			return '<h4>Не указан идентификатор курса. Выберите требуемый курс из <a href="/courses">списка открытых курсов</a></h4>';
 		}
-		$result = $this->db->query("SELECT 
+		$result = $this->db->query("SELECT
 		`courses`.id,
 		`courses`.pid,
 		DATE_FORMAT(`courses`.startdate, '%d.%m.%Y г.') AS startdate,
@@ -405,14 +405,14 @@ class Cntmodel extends CI_Model{
 		FROM courses
 		WHERE
 		`courses`.id = ?
-		LIMIT 1", array($id));
-		if($result->num_rows()){
+		LIMIT 1", array($contractID));
+		if ($result->num_rows()) {
 			$output = $result->row_array();
-		}else{
+		} else {
 			return "<h3>Информации о проводимых курсах не найдено.<br>Создайте курс, чтобы иметь возможность открывать контракты.</h3>";
 		}
 
-		$result = $this->db->query("SELECT 
+		$result = $this->db->query("SELECT
 		CONCAT_WS(' ', patients.pat_f, patients.pat_i, patients.pat_o) AS pat_fio,
 		patients.pat_address,
 		patients.pat_birthdate,
@@ -427,13 +427,13 @@ class Cntmodel extends CI_Model{
 		INNER JOIN patients ON (`clients`.id = patients.pat_clientid)
 		WHERE
 		(patients.id = ?)", array($output['pid']));
-		if($result->num_rows()){
+		if ($result->num_rows()) {
 			$row = $result->row_array();
 			$output = array_merge($output, $row);
 		}
 
 		$contracts = array();
-		$result = $this->db->query("SELECT 
+		$result = $this->db->query("SELECT
 		`contracts`.id,
 		`contracts`.crsid,
 		`contracts`.cont_number,
@@ -443,9 +443,9 @@ class Cntmodel extends CI_Model{
 		FROM
 		`contracts`
 		WHERE
-		`contracts`.crsid = ?", array($id));
-		if($result->num_rows()){
-			foreach($result->result() as $row){
+		`contracts`.crsid = ?", array($contractID));
+		if ($result->num_rows()) {
+			foreach($result->result() as $row) {
 				$string = '<tr>
 					<td># '.$row->cont_number.'</td>
 					<td>
@@ -455,14 +455,14 @@ class Cntmodel extends CI_Model{
 					<td></td>
 				</tr>';
 			}
-		}else{
+		} else {
 			array_push($contracts, "<tr><td colspan=3><h4>Информации о контрактах не найдено.<br>Создайте контракт и выберите оказываемые по нему услуги.</h4></td></tr>");
 		}
 		$output['contracts'] = implode($contracts, "\n");
 		return $this->load->view('proc/courseitem', $output, true);
 	}
 
-	public function cnt_initdata_get(){
+	public function cnt_initdata_get() {
 		$output = array();
 		$clients = array('<option value="0" title="Выберите клиента">Выберите клиента</option>');
 		$services = array('<option value="0" title="Выберите услугу">Выберите услугу</option>');
@@ -510,11 +510,33 @@ class Cntmodel extends CI_Model{
 		}";
 	}
 
-	public function cnt_data_get($cnt=0){
-		$cnt    = ($cnt) ? $cnt : $this->input->post('cnt');
-		$output = array();
-		$t_client  = 0;
-		$t_patient = 0;
+	// извлечение данных контракта
+	public function cnt_data_get($cnt = 0) {
+		$cnt           = ($cnt) ? $cnt : $this->input->post('cnt');
+		$data          = $this->cntDataGet($cnt);		// выборка свойств самого контракта
+		$services      = $this->cntServicesGet($cnt);	// выборка свойств услуг по контракту
+		$c_services    = $this->cntServicesListCompose($services);
+		$servstartdate = $this->cntStartDateGet($cnt);
+		# Подготовка справочников
+		$servicesList  = $this->cntServicesFullListDataGet(); // выборка сдвоенного справочника %) цены на услуги/список услуг 
+		$clientsList   = $this->cntClientDataGet($data['client']);
+		return "contract = {
+			data          : ".$data['contract_data'].",
+			servstartdate : '".$servstartdate."',
+			servlist      : '".implode($servicesList['list'], "")."',
+			clientlist    : '".$clientsList."',
+			patient       : '',
+			services      : ".$c_services."
+		};
+		sp = { ".implode($servicesList['price'], ", ")." }";
+	}
+
+	private function cntDataGet($cnt = 0) {
+		$output = array(
+			'client'        => 0,
+			'patient'       => 0,
+			'contract_data' => '{}'
+		);
 		$result = $this->db->query("SELECT 
 		contracts.id,
 		contracts.cont_number as num,
@@ -535,13 +557,17 @@ class Cntmodel extends CI_Model{
 		LIMIT 1", array($cnt));
 		if($result->num_rows()){
 			$row = $result->row(0);
-			$t_client   = $row->cid;
-			$t_patient  = $row->pid;
-			$c_contract = "{ id: ".$row->id.", num: '".$row->num."', start: '".$row->start."', end: '".$row->end."', active: '".$row->active."', client: '".$row->cid."', patient: '".$row->pid."', signed: ".$row->signed.", parent: ".$row->parent." }";
+			$output = array(
+				'client'   => $row->cid,
+				'patient'  => $row->pid,
+				'contract_data' => "{ id: ".$row->id.", num: '".$row->num."', start: '".$row->start."', end: '".$row->end."', active: '".$row->active."', client: '".$row->cid."', patient: '".$row->pid."', signed: ".$row->signed.", parent: ".$row->parent." }"
+			);
 		}
+		return $output;
+	}
 
-		$services = array();
-		$servlist = array();
+	private function cntServicesGet($cnt) {
+		$output = array();
 		$result = $this->db->query("SELECT 
 		contract_services.bas_num,
 		contract_services.bas_days,
@@ -561,38 +587,47 @@ class Cntmodel extends CI_Model{
 		if($result->num_rows()){
 			foreach($result->result() as $row){
 				$price   = ($row->refprice) ? $row->refprice : $row->serv_price;
-				$price_k = ($price % 100) ? str_pad(($price % 100), 2, "0") : "00";
-				$services[$row->serv_id]['days']    = $row->bas_days;
-				$services[$row->serv_id]['num']     = $row->bas_num;
-				$services[$row->serv_id]['date']    = $row->initdate;
-				$services[$row->serv_id]['price']   = substr($price, 0, -2);
-				$services[$row->serv_id]['price_k'] = $price_k;
+				$output[$row->serv_id] = array(
+					'days'    => $row->bas_days,
+					'num'     => $row->bas_num,
+					'date'    => $row->initdate,
+					'price'   => substr($price, 0, -2),
+					'price_k' => ($price % 100) ? str_pad(($price % 100), 2, "0") : "00"
+				);
 			}
 		}
+		return $output;
+	}
 
-		$result = $this->db->query("SELECT 
+	private function cntStartDateGet($cnt) {
+		$result = $this->db->query("SELECT
 		DATE_FORMAT(MIN(service_calendar.ordered_date), '%d.%m.%Y') AS od
 		FROM
 		service_calendar
 		WHERE
-		(service_calendar.contract_id = ?)", array($cnt));
-		if($result->num_rows()){
-			$row = $result->row(0);
-			$servstartdate = $row->od;
+		(service_calendar.contract_id = ?)
+		LIMIT 1", array($cnt));
+		if ($result->num_rows()) {
+			$row = $result->row();
+			return $row->od;
 		}
+		return 0;
+	}
 
-		foreach($services as $key=>$val){
+	private function cntServicesListCompose($services){
+		$output = array();
+		foreach ($services as $key=>$val) {
 			$string = $key.": { num: '".$val['num']."', days: '".$val['days']."', price: '".$val['price']."', price_k: '".$val['price_k']."', date: '".$val['date']."' }";
-			array_push($servlist, $string);
+			array_push($output, $string);
 		}
-
-		$c_services = "{ ".implode($servlist, ",")." }";
-		########
-		#			Подготовка справочников
-		#
-		########
-		$services = array('<option value="0">Выберите услугу</option>'); // повторное использование массива, после его обнуления - снова выбираем сервисы :)
-		$serv_prices = array();
+		return "{ ".implode($output, ",")." }";
+	}
+	
+	private function cntServicesFullListDataGet () {
+		$output = array(
+			'list'  => array('<option value="0">Выберите услугу</option>'),
+			'price' => array()
+		);
 		$result = $this->db->query("SELECT 
 		`services`.serv_name,
 		`services`.serv_alias,
@@ -604,14 +639,15 @@ class Cntmodel extends CI_Model{
 		`services`.serv_name");
 		if($result->num_rows()){
 			foreach($result->result() as $row){
-				$string = '<option value="'.$row->id.'" title="'.$row->serv_alias.'">'.$row->serv_name.'</option>';
-				array_push($services, $string);
-				$string = $row->id.": ".$row->sp;
-				array_push($serv_prices, $string);
+				array_push($output['list'], '<option value="'.$row->id.'" title="'.$row->serv_alias.'">'.$row->serv_name.'</option>');
+				array_push($output['price'], $row->id.": ".$row->sp);
 			}
 		}
-
-		$clients = array('<option value="0" title="Выберите клиента">Выберите клиента</option>');
+		return $output;
+	}
+	
+	private function cntClientDataGet($clientID) {
+		$output = array('<option value="0" title="Выберите клиента">Выберите клиента</option>');
 		$result = $this->db->query("SELECT 
 		CONCAT_WS(' ', clients.cli_f, clients.cli_i, clients.cli_o) AS cli_fio,
 		CONCAT_WS(' ', clients.cli_f, CONCAT(LEFT(clients.cli_i, 1),'.', LEFT(clients.cli_o, 1),'.')) AS cli_init,
@@ -620,24 +656,16 @@ class Cntmodel extends CI_Model{
 		clients
 		WHERE `clients`.`active` 
 		OR clients.id = ?
-		ORDER BY cli_fio", array($t_client));
+		ORDER BY cli_fio", array($clientID));
 		if($result->num_rows()){
 			foreach($result->result() as $row){
 				$string = '<option value="'.$row->id.'" title="'.$row->cli_fio.'">'.$row->cli_init.'</option>';
-				array_push($clients, $string);
+				array_push($output, $string);
 			}
 		}
-
-		return "contract = {
-			data: ".$c_contract.",
-			servstartdate: '".$servstartdate."',
-			servlist: '".implode($services, "")."',
-			clientlist: '".implode($clients, "")."',
-			patient: '',
-			services: ".$c_services."
-		};
-		sp = { ".implode($serv_prices, ", ")." }";
+		return implode($output, "");
 	}
+	// конец извлечения данных контракта
 
 	public function rel_pats_get(){
 		$patients = array('<option value="0" title="Выберите пациента">Выберите пациента</option>');
