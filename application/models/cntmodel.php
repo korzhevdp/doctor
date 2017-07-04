@@ -791,7 +791,7 @@ class Cntmodel extends CI_Model{
 	}
 
 	// sheduler now used:
-	public function shedule_calc2($startdate=0, $days=array(), $rounds=1){
+	private function shedule_calc2($startdate=0, $days=array(), $rounds=1){
 		$output  = array($days);
 		//print implode($days, ", ")."<br>";
 		//два режима работы - вставка услуги на единственный день и вставка услуги по опорному графику по дням недели
