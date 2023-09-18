@@ -3,305 +3,319 @@ class Shedmodel extends CI_Model{
 	
 	public function __construct(){
 		parent::__construct();
-		//$this->output->enable_profiler(TRUE);
 	}
 
 	public function show($year, $month){
-		//$this->output->enable_profiler(TRUE);
-		$data   = array();
-		$output = array();
-		$result = $this->db->query("SELECT 
-		DATE_FORMAT(service_calendar.ordered_date, '%e') as `workday`,
-		DATE_FORMAT(service_calendar.ordered_date, '%Y/%m/%d') as `linkday`,
-		CASE WHEN service_calendar.is_done THEN 'done'
-			 WHEN DATEDIFF(`service_calendar`.`ordered_date`, NOW()) < 0 AND NOT service_calendar.is_done THEN 'missed'
-			 ELSE 'info'
-		END as `state`
+		$calendarData = array();
+		$result       = $this->db->query("SELECT 
+		DATE_FORMAT(service_calendar.ordered_date, '%e')		AS `workday`,
+		DATE_FORMAT(service_calendar.ordered_date, '%Y/%m/%d')	AS `linkday`,
+		CASE
+			WHEN `service_calendar`.is_done THEN 'done'
+			WHEN DATEDIFF(`service_calendar`.`ordered_date`, NOW()) < 0 AND NOT `service_calendar`.is_done THEN 'missed'
+			ELSE 'info'
+		END														AS `state`
 		FROM
 		service_calendar
 		WHERE
 		(DATE_FORMAT(service_calendar.ordered_date, '%Y%m') = ?)
-		ORDER BY `workday`", array($year.$month));
-		if($result->num_rows()){
-			foreach($result->result() as $row){
-				if(!isset($data[$row->workday])){
-					$data[$row->workday] = array(
+		ORDER BY `workday`", array( $year.$month ));
+		if ( $result->num_rows() ) {
+			foreach ( $result->result() as $row ) {
+				if ( !isset( $calendarData[$row->workday] ) ) {
+					$calendarData[$row->workday] = array(
 						'servnum' => 0,
 						'missed'  => 0,
 						'done'    => 0,
-						'link'    => "/shedule/day/".$row->linkday,
-						'link2'   => "/shedule/pload/".$row->linkday
+						'link'    => base_url()."shedule/day/".$row->linkday,
+						'link2'   => base_url()."shedule/pload/".$row->linkday
 					);
 				}
-				++$data[$row->workday]['servnum'];
-				switch($row->state){
-					case "missed":
-						++$data[$row->workday]['missed'];
-					break;
-					case "done":
-						++$data[$row->workday]['done'];
-					break;
+				$calendarData[$row->workday]['servnum']++;
+				if ( $row->state  == 'missed' ) {
+					$calendarData[$row->workday]['missed']++;
+				}
+				if ( $row->state  == "done" ) {
+					$calendarData[$row->workday]['done']++;
 				}
 			}
 		}
-		//print_r($data);
-		return $this->load->view('proc/shedulecalendar', array('calendar' => $this->calendar->generate($year, $month, $data)), true);
+		return $this->load->view('proc/shedulecalendar', array(
+			'calendar' => $this->calendar->generate($year, $month, $calendarData)
+		), true);
 	}
 
-	public function day2($year, $month, $day){
-		// $this->output->enable_profiler(TRUE);
+	public function day2($year, $month, $day) {
 		// calendar assumptions
-		$starthour = 8;
-		$endhour = 21;
-		$discretion = 30; // minutes
-		$q1 = 60 / $discretion; // planner period
-		$q2 = ($endhour -$starthour) * $q1; // planner length
-		//
-		$data = array();
-		$output = array();
-		$table = array();
-		$patients = array();
-		$result = $this->db->query("SELECT 
+		$starthour     = 8;
+		$endhour       = 21;
+		$discretion    = 30; // minutes
+		$plannerPeriod = 60 / $discretion; // planner period
+		$plannerLength = ( $endhour - $starthour ) * $plannerPeriod; // planner length
+		$data          = array();
+		$output        = array();
+		$table         = array();
+		$patients      = array();
+		$result        = $this->db->query("SELECT 
 		service_calendar.contract_id,
-		service_calendar.id as cal_id,
-		IF(LENGTH(service_calendar.staff_id) OR service_calendar.staff_id > 0, 1, 0) AS staff,
-		patients.id AS patid,
-		CONCAT(patients.pat_f, ' ', LEFT(patients.pat_i, 1), '.' ,LEFT(patients.pat_o, 1), '.') AS fio,
-		services.id,
-		services.serv_name,
+		service_calendar.id																		AS calendarItemID,
+		IF(LENGTH(service_calendar.staff_id) OR service_calendar.staff_id > 0, 1, 0)			AS staff,
+		patients.id																				AS patientID,
+		CONCAT(patients.pat_f, ' ', LEFT(patients.pat_i, 1), '.' ,LEFT(patients.pat_o, 1), '.')	AS patientFIO,
+		services.id																				AS serviceID,
+		services.serv_name																		AS serviceTitle,
 		((TIME_FORMAT(service_calendar.ordered_time, '%H')     - ?) * ?) + (TIME_FORMAT(service_calendar.ordered_time,     '%i') / ?) AS `ot`,
 		((TIME_FORMAT(service_calendar.ordered_time_end, '%H') - ?) * ?) + (TIME_FORMAT(service_calendar.ordered_time_end, '%i') / ?) AS `ote`
 		FROM
 		service_calendar
 		LEFT OUTER JOIN contracts ON (service_calendar.contract_id = contracts.id)
-		LEFT OUTER JOIN courses ON (contracts.crsid = courses.id)
-		LEFT OUTER JOIN patients ON (courses.pid = patients.id)
-		LEFT OUTER JOIN services ON (service_calendar.service_id = services.id)
+		LEFT OUTER JOIN courses   ON (contracts.crsid              = courses.id)
+		LEFT OUTER JOIN patients  ON (courses.pid                  = patients.id)
+		LEFT OUTER JOIN services  ON (service_calendar.service_id  = services.id)
 		WHERE
-		(DATE_FORMAT(service_calendar.ordered_date, '%Y%m%d') = ?)", array($starthour, $q1, $discretion, $starthour, $q1, $discretion, $year.$month.$day));
-		if($result->num_rows()){
+		(DATE_FORMAT(service_calendar.ordered_date, '%Y%m%d')      = ?)", array(
+			$starthour,
+			$plannerPeriod,
+			$discretion,
+			$starthour,
+			$plannerPeriod,
+			$discretion,
+			$year.$month.$day
+		));
+
+		if ( $result->num_rows() ) {
 			// массив данных по услугам пациента
-			foreach($result->result() as $row){
-				$serv = array(
-					'staffset' => $row->staff,
-					'fio' => $row->fio,
-					'cal_id' => $row->cal_id,
-					'sn' => $row->serv_name,
-					'sid' => $row->id,
-					'id' => $row->patid,
-					'ot' => (int) $row->ot,
-					'ote' => (int) $row->ote);
-				if(!isset($patients[$row->patid])){
-					$patients[$row->patid] = array();
+			foreach ( $result->result() as $row ) {
+				if ( !isset( $patients[$row->patientID] ) ) {
+					$patients[$row->patientID] = array();
 				}
-				array_push($patients[$row->patid], $serv);
+
+				$servicesSetting = array(
+					'isStaffSet'		=> $row->staff,
+					'patientFIO'				=> $row->patientFIO,
+					'calendarItemID'	=> $row->calendarItemID,
+					'sn'				=> $row->serviceTitle,
+					'serviceID'				=> $row->serviceID,
+					'id'				=> $row->patientID,
+					'ot'				=> (int) $row->ot,
+					'ote'				=> (int) $row->ote
+				);
+				array_push($patients[$row->patientID], $servicesSetting);
 			}
-			//print_r($patients);
-			// вставка ячеек в строки
-			function insertCells($patients, $quantum = 1){
-				$output = array();
-				foreach($patients as $val) {
-					foreach($val as $servs){
-						$classes = array('servcell');
-						$icon = "&nbsp;";
-						if($quantum <= $servs['ote'] && $quantum > $servs['ot']){
-							array_push($classes, 'servactive');
-							$icon = ($servs['staffset'])
-								? '<img src="/images/alarm-clock.png" width="16" height="16" border="0" alt="">' 
-								: '<img src="/images/alarm-clock-err.png" width="16" height="16" border="0" alt="">';
-						}
-						array_push($output, '<td style="text-align:center;" class="'.implode($classes, " ").' c'.$servs['cal_id'].'" title="'.$servs['sn'].'" sid="'.$servs['sid'].'" cal="'.$servs['cal_id'].'" ref="'.$quantum.'" fio="'.$servs['fio'].'">'.$icon.'</td>');
-					}
-				}
-				return implode($output, "");
-			}
-			//вставка ячеек заголовка
-			function insertHCells($patients){
-				$output = array();
-				foreach($patients as $val) {
-					array_push($output, '<th colspan='.sizeof($val).' style="min-width:90px;text-align:center;">'.$val[0]['fio'].'</th>');
-				}
-				return implode($output, "");
-			}
-			// calculation args
-			// $discretion = 30; // minutes
-			// $q1 = 60 / $discretion; // planner period
-			// $q2 = ($endhour -$starthour) * $q1; // planner length
-			for($i = 0; $i < $q2; $i++){
-				if($i == 0 || !($i%$q1)){
-					$string = '<tr>
-						<td rowspan='.$q1.' style="vertical-align:middle;text-align:center;width:50px;font-size:36px;color:#7e7e7e;font-weight:bold;">'.($starthour + ceil($i/$q1)).':00</td>
-						<td style="vertical-align:middle;text-align:center;width:50px;font-size:14px;color:#7e7e7e;font-weight:bold;">'.($starthour + ceil($i/$q1)).":".($discretion*($i%$q1)).'0</td>
-						'.insertCells($patients, ($i+1)).'
+
+			for ( $i = 0; $i < $plannerLength; $i++ ) {
+				$string = ( $i && $i % $plannerPeriod )
+					? '<tr>
+						<td style="vertical-align:middle;text-align:center;width:50px;font-size:14px;color:#7e7e7e;font-weight:bold;">'.($starthour + ceil( $i / $plannerPeriod ) - 1).":".( $discretion * ( $i % $plannerPeriod ) ).'</td>
+						'.$this->insertCells( $patients, ( $i + 1 ) ).'
+						<td></td>
+					</tr>'
+					: '<tr>
+						<td rowspan='.$plannerPeriod.' style="vertical-align:middle;text-align:center;width:50px;font-size:36px;color:#7e7e7e;font-weight:bold;">'.( $starthour + ceil( $i / $plannerPeriod ) ).':00</td>
+						<td style="vertical-align:middle;text-align:center;width:50px;font-size:14px;color:#7e7e7e;font-weight:bold;">'.( $starthour + ceil( $i / $plannerPeriod ) ).":".( $discretion * ( $i % $plannerPeriod)).'0</td>
+						'.$this->insertCells( $patients, ( $i + 1 ) ).'
 						<td></td>
 					</tr>';
-				}else{
-					$string = '<tr>
-						<td style="vertical-align:middle;text-align:center;width:50px;font-size:14px;color:#7e7e7e;font-weight:bold;">'.($starthour + ceil($i/$q1) - 1).":".($discretion*($i%$q1)).'</td>
-						'.insertCells($patients, ($i+1)).'
-						<td></td>
-					</tr>';
-				}
+
 				array_push($table, $string);
 			}
 		}
-		$tabledata['table'] = implode($table, "\n");
-		$tabledata['date']  = implode(array($day, $month, $year), ".");
-		$tabledata['headings']  = insertHCells($patients);
-		$output['menu'] = $this->load->view('menu', $output, true);
+		$tabledata = array(
+			'table'		=> implode("\n", $table),
+			'date'		=> implode(".", array($day, $month, $year)),
+			'headings'	=> $this->insertHCells($patients),
+			'headings2'	=> ""
+		);
+		$output['menu']    = $this->load->view('menu', $output, true);
 		$output['content'] = $this->load->view('proc/shedule', $tabledata, true);
 		$this->load->view('view', $output);
 	}
 
-	public function day($year, $month, $day){
-		// $this->output->enable_profiler(TRUE);
-		// calendar assumptions
-		$starthour	= 8;
-		$endhour	= 21;
-		$discretion	= 30; // minutes
-		$q1			= 60 / $discretion; // planner period
-		$q2			= ($endhour -$starthour) * $q1; // planner length
-		//
-		$data		= array();
-		$output		= array();
-		$table		= array();
-		$patients	= array();
-
-		$result = $this->db->query("SELECT 
-		service_calendar.contract_id,
-		service_calendar.id as cal_id,
-		IF(LENGTH(service_calendar.staff_id) OR service_calendar.staff_id > 0, 1, 0) AS staff,
-		patients.id AS patid,
-		CONCAT(patients.pat_f, ' ', LEFT(patients.pat_i, 1), '.' ,LEFT(patients.pat_o, 1), '.') AS fio,
-		services.id,
-		services.serv_name,
-		services.serv_alias,
-		((TIME_FORMAT(service_calendar.ordered_time, '%H')     - ?) * ?) + (TIME_FORMAT(service_calendar.ordered_time,     '%i') / ?) AS `ot`,
-		((TIME_FORMAT(service_calendar.ordered_time_end, '%H') - ?) * ?) + (TIME_FORMAT(service_calendar.ordered_time_end, '%i') / ?) AS `ote`
-		FROM
-		service_calendar
-		LEFT OUTER JOIN contracts ON (service_calendar.contract_id = contracts.id)
-		LEFT OUTER JOIN courses   ON (contracts.crsid = courses.id)
-		LEFT OUTER JOIN patients  ON (courses.pid = patients.id)
-		LEFT OUTER JOIN services  ON (service_calendar.service_id = services.id)
-		WHERE
-		(DATE_FORMAT(service_calendar.ordered_date, '%Y%m%d') = ?)", array($starthour, $q1, $discretion, $starthour, $q1, $discretion, $year.$month.$day));
-
-		if($result->num_rows()){
-			// массив данных по услугам пациента
-			foreach($result->result() as $row){
-				$serv = array(
-					'staffset'	=> $row->staff,
-					'fio'		=> $row->fio,
-					'cal_id'	=> $row->cal_id,
-					'sn'		=> $row->serv_name,
-					'sa'		=> $row->serv_alias,
-					'sid'		=> $row->id,
-					'id'		=> $row->patid,
-					'ot'		=> (int) $row->ot,
-					'ote'		=> (int) $row->ote);
-				if(!isset($patients[$row->patid])){
-					$patients[$row->patid] = array();
+	private function insertCells ( $patients, $quantum = 1 ) { 			// вставка ячеек в строки
+		$output = array();
+		foreach ( $patients as $patientServices ) {
+			foreach ( $patientServices as $patientService ) {
+				$classes  = array('servcell');
+				$icon     = "&nbsp;";
+				if ( $quantum <= $patientService['ote'] && $quantum > $patientService['ot'] ) {
+					array_push($classes, 'servactive');
+					$icon = ( $patientService['isStaffSet'] )
+						? '<img src="'.base_url().'images/alarm-clock.png" width="16" height="16" border="0" alt="">' 
+						: '<img src="'.base_url().'images/alarm-clock-err.png" width="16" height="16" border="0" alt="">';
 				}
-				array_push($patients[$row->patid], $serv);
+				array_push($output, '<td style="text-align:center;" class="'.implode(" ", $classes).' c'.$patientService['calendarItemID'].'" title="'.$patientService['sn'].'" sid="'.$patientService['serviceID'].'" cal="'.$patientService['calendarItemID'].'" ref="'.$quantum.'" fio="'.$patientService['patientFIO'].'">'.$icon.'</td>');
+			}
+		}
+		return implode("", $output);
+	}
+
+	private function insertHCells($patients){ 
+		//вставка ячеек заголовка
+
+		$output = array();
+		foreach ( $patients as $val ) {
+			array_push($output, '<th colspan='.sizeof($val).' style="min-width:90px;text-align:center;">'.$val[0]['patientFIO'].'</th>');
+		}
+		return implode("", $output);
+	}
+
+	private function getScheduleHeaderRow($starthour, $endhour, $discretion, $plannerPeriod, $plannerLength) {
+		$hoursHeader	= array();
+		$hoursMinutesHeader = array();
+		for ( $i = 1; $i <= $plannerLength; $i++ ) {
+			if ( $i % 2 ) {
+				$string = '<th colspan=2 class="schedulerTableHeader">'.( $starthour + ceil( $i / $plannerPeriod ) - 1).":".( ( $discretion * ( $i % $plannerPeriod ) ) ? "00" : $discretion ).'</th>';
+				array_push($hoursHeader, $string);
+			}
+			$string = '<th class="schedulerTableHeader">'.( $starthour + ceil( $i / $plannerPeriod ) - 1).":".( ( $discretion * ( $i % $plannerPeriod ) ) ? "00" : $discretion).'</th>';
+			array_push($hoursMinutesHeader, $string);
+		}
+		return implode("\n", array(
+			//implode("\n", $hoursHeader), // может быть исключено
+			implode("\n", $hoursMinutesHeader)
+		));
+	}
+
+	public function day($year, $month, $day) {
+		// calendar assumptions
+		$starthour		= 8;
+		$endhour		= 21;
+		$discretion		= 30; // minutes
+		$plannerPeriod	= 60 / $discretion; // planner period
+		$plannerLength	= ($endhour -$starthour) * $plannerPeriod; // planner length
+		$data			= array();
+		$output			= array();
+		$table			= array();
+		$patients		= array();
+
+		$result = $this->db->query("SELECT
+		`services`.serv_alias																	AS serviceAlias,
+		`services`.id																			AS serviceID,
+		`services`.serv_name																	AS serviceTitle,
+		`service_calendar`.id																	AS calendarItemID,
+		IF(LENGTH(service_calendar.staff_id) OR service_calendar.staff_id > 0, 1, 0)			AS isStaffSet,
+		`patients`.id																			AS patientID,
+		CONCAT(patients.pat_f, ' ', LEFT(patients.pat_i, 1), '.' ,LEFT(patients.pat_o, 1), '.') AS patientFIO,
+		((TIME_FORMAT(service_calendar.ordered_time, '%H') - ?) * ?) +
+			(TIME_FORMAT(service_calendar.ordered_time, '%i') / ?)								AS `orderedTime`,
+		((TIME_FORMAT(service_calendar.ordered_time_end, '%H') - ?) * ?) +
+			(TIME_FORMAT(service_calendar.ordered_time_end, '%i') / ?)							AS `orderedTimeEnd`
+		FROM
+		`service_calendar`
+		LEFT OUTER JOIN courses   ON (contracts.crsid              = courses.id)
+		LEFT OUTER JOIN patients  ON (courses.pid                  = patients.id)
+		LEFT OUTER JOIN services  ON (service_calendar.service_id  = services.id)
+		WHERE
+		(DATE_FORMAT(service_calendar.ordered_date, '%Y%m%d')      = ?)", array(
+			$starthour,
+			$plannerPeriod,
+			$discretion,
+			$starthour,
+			$plannerPeriod,
+			$discretion,
+			$year.$month.$day
+		));
+
+		if ( $result->num_rows() ) {
+			// массив данных по услугам пациента
+			foreach ( $result->result() as $row ) {
+				if ( !isset( $patients[$row->patientID] ) ) {
+					$patients[$row->patientID] = array();
+				}
+				$serviceData = array(
+					'isStaffSet'		=> $row->isStaffSet,
+					'patientFIO'		=> $row->patientFIO,
+					'calendarItemID'	=> $row->calendarItemID,
+					'serviceTitle'		=> $row->serviceTitle,
+					'serviceAlias'		=> $row->serviceAlias,
+					'serviceID'			=> $row->serviceID,
+					'orderedTime'		=> (int) $row->orderedTime,
+					'orderedTimeEnd'	=> (int) $row->orderedTimeEnd
+				);
+				array_push($patients[$row->patientID], $serviceData);
 			}
 
-			//print_r($patients);
-			
 			// вставка ячеек в строки
-			foreach($patients as $val) {
-				$n = 0;
-				foreach($val as $servs){
-					$icon = "&nbsp;";
-					if(!$n){
-						array_push($table, '<td rowspan="'.sizeof($val).'" style="vertical-align:middle;text-align:center;">'.$servs['fio'].'<br><small class="muted">'.$servs['sa'].'</small></td>');
-						$n++;
+			foreach ( $patients as $patientServices ) {
+				$tableColsCount = 0;
+				foreach ( $patientServices as $patientService ) {
+					if ( !$tableColsCount ) {
+						array_push($table, '<td rowspan="'.sizeof($patientServices).'">'
+							.$patientService['patientFIO'].'<br>
+							<small class="muted">'.$patientService['serviceAlias'].'</small>
+						</td>');
+						$tableColsCount++;
 					}
-					for($quantum = 1; $quantum <=$q2; $quantum++){
-						$classes = array('servcell');
-						if($quantum <= $servs['ote'] && $quantum > $servs['ot']){
+					for ( $timeSlot = 1; $timeSlot <= $plannerLength; $timeSlot++ ) {
+						$classes   = array('serviceCell');
+						$icon      = "&nbsp;";
+						if ( $timeSlot <= $patientService['orderedTimeEnd'] && $timeSlot > $patientService['orderedTime'] ) {
 							array_push($classes, 'servactive');
-							$icon = ($servs['staffset'])
-								? '<img src="/images/alarm-clock.png" width="16" height="16" border="0" alt="">' 
-								: '<img src="/images/alarm-clock-err.png" width="16" height="16" border="0" alt="">';
-						}else{
-							$icon = "&nbsp;";
+							$icon  = ($patientService['isStaffSet'])
+								? '<img src="'.base_url().'images/alarm-clock.png" width="16" height="16" border="0" alt="">' 
+								: '<img src="'.base_url().'images/alarm-clock-err.png" width="16" height="16" border="0" alt="">';
 						}
-						array_push($table, '<td style="text-align:center;vertical-align:middle;" class="'.implode($classes, " ").' c'.$servs['cal_id'].'" title="'.$servs['sn'].'" sid="'.$servs['sid'].'" cal="'.$servs['cal_id'].'" ref="'.$quantum.'" fio="'.$servs['fio'].'">'.$icon.'</td>');
+						array_push($table, '<td class="'.implode(" ", $classes).' c'.$patientService['calendarItemID'].'" title="'.$patientService['serviceTitle'].'" sid="'.$patientService['serviceID'].'" cal="'.$patientService['calendarItemID'].'" ref="'.$timeSlot.'" fio="'.$patientService['patientFIO'].'">'.$icon.'</td>');
 					}
 					array_push($table, "</tr><tr>");
 				}
-
 			}
-			//вставка ячеек заголовка
-			$out1 = array();
-			$out2 = array();
-			for($i = 1; $i <= $q2; $i++){
-				//row1
-				if($i%2){
-					$string = '<th colspan=2 style="vertical-align:middle;text-align:center;width:50px;font-size:14px;color:#7e7e7e;font-weight:bold;">'.($starthour + ceil($i/$q1) - 1).":".(($discretion*($i%$q1)) ? "00" : $discretion).'</th>';
-					array_push($out1, $string);
-				}
-				//row2
-				$string = '<th style="vertical-align:middle;text-align:center;width:50px;font-size:14px;color:#7e7e7e;font-weight:bold;">'.($starthour + ceil($i/$q1) - 1).":".(($discretion*($i%$q1)) ? "00" : $discretion).'</th>';
-				array_push($out2, $string);
-			}
-			$headings1 = implode($out1, "\n");
-			$headings2 = implode($out2, "\n");
-			// calculation args
-			// $discretion = 30; // minutes
-			// $q1 = 60 / $discretion; // planner period
-			// $q2 = ($endhour -$starthour) * $q1; // planner length
 		}
-		$tabledata['table']			= implode($table, "\n");
-		$tabledata['date']			= implode(array($day, $month, $year), ".");
-		$tabledata['headings1']		= $headings1;
-		$tabledata['headings2']		= $headings2;
-		$output['menu']				= $this->load->view('menu', $output, true);
-		$output['content']			= $this->load->view('proc/shedule', $tabledata, true);
+
+		$tabledata = array(
+			'table'		=> implode("\n", $table),
+			'date'		=> implode(".", array($day, $month, $year)),
+			'headings1'	=> "",
+			'headings2'	=> $this->getScheduleHeaderRow($starthour, $endhour, $discretion, $plannerPeriod, $plannerLength)
+		);
+
+		$output['menu']		= $this->load->view('menu', $output, true);
+		$output['content']	= $this->load->view('proc/shedule', $tabledata, true);
 		$this->load->view('view', $output);
 	}
 
-	public function savetime(){
-		$this->output->enable_profiler(TRUE);
-		//return false;
-		if($this->input->post('start') && $this->input->post('stop') && $this->input->post('cal')) {
-			if(!$this->input->post('next') && !$this->input->post('all')){
-				$result = $this->db->query("UPDATE
+	public function savetime() {
+		if (  $this->input->post('start')
+			&& $this->input->post('stop')
+			&& $this->input->post('cal')
+		) {
+			if (	!$this->input->post('next') 
+					&& !$this->input->post('all')
+			) {
+				$this->db->query("UPDATE
 				service_calendar
 				SET
-				service_calendar.ordered_time = ?,
+				service_calendar.ordered_time     = ?,
 				service_calendar.ordered_time_end = ?,
-				service_calendar.staff_id = ?
+				service_calendar.staff_id         = ?
 				WHERE
-				service_calendar.id = ?", array(
+				service_calendar.id               = ?", array(
 					$this->input->post('start'),
 					$this->input->post('stop'),
 					$this->input->post('inst'),
 					$this->input->post('cal')
-					)
-				);
-				if($this->db->affected_rows()){
+				));
+				if ( $this->db->affected_rows() ) {
 					print "OK";
 				}
 			}
 			
-			if($this->input->post('all')){
-				$data = array();
+			if ( $this->input->post('all') ) {
+				$data   = array();
 				$result = $this->db->query("SELECT `service_calendar`.`id`
 				FROM `service_calendar`
 				WHERE `service_calendar`.`contract_id` = (
 					SELECT `service_calendar`.`contract_id` FROM `service_calendar` WHERE `service_calendar`.id = ?
 				)
 				AND `service_calendar`.`service_id` = (
-					SELECT `service_calendar`.`service_id` FROM `service_calendar` WHERE `service_calendar`.id = ?
+					SELECT `service_calendar`.`service_id`  FROM `service_calendar` WHERE `service_calendar`.id = ?
 				)", array(
 					$this->input->post('cal'),
 					$this->input->post('cal')
 				));
-				if($result->num_rows()){
-					foreach($result->result() as $row){
-						array_push($data, $row->id);
+				if ( $result->num_rows() ) {
+					foreach ( $result->result() as $row) {
+						array_push( $data, $row->id );
 					}
 					// по многочисленным заявкам ленивых секретарш в следующем запросе
 					//
@@ -312,11 +326,11 @@ class Shedmodel extends CI_Model{
 					$this->db->query("UPDATE
 					service_calendar
 					SET
-					service_calendar.ordered_time = ?,
+					service_calendar.ordered_time     = ?,
 					service_calendar.ordered_time_end = ?,
-					service_calendar.staff_id = ?
+					service_calendar.staff_id         = ?
 					WHERE
-					(service_calendar.id) IN (".implode($data, ", ").") 
+					(service_calendar.id) IN (".implode(", ", $data).") 
 					AND NOT service_calendar.is_done", array(
 						$this->input->post('start'),
 						$this->input->post('stop'),
@@ -329,7 +343,7 @@ class Shedmodel extends CI_Model{
 				return false;
 			}
 
-			if($this->input->post('next')){
+			if ( $this->input->post('next') ) {
 				$data = array();
 				$result = $this->db->query("SELECT `service_calendar`.`id`
 				FROM `service_calendar`
@@ -399,9 +413,9 @@ class Shedmodel extends CI_Model{
 			$inst = $row->staff_id;
 		}
 		$string = "var staffdata = { 
-			suitableList: '".implode($list, "")."',
+			suitableList: '".implode("", $list)."',
 			inst: ".$inst.",
-			info: { ".implode($info, ", ")." }
+			info: { ".implode(", ", $info)." }
 		}";
 		print $string;
 	}
@@ -438,7 +452,7 @@ class Shedmodel extends CI_Model{
 					SET
 					staff_id = ?
 					WHERE
-					(service_calendar.id) IN (".implode($data, ", ").") 
+					(service_calendar.id) IN (".implode(", ", $data).") 
 					AND NOT service_calendar.is_done", array($this->input->post('inst'), $this->input->post('cal'), $this->input->post('cal')));
 					if($this->db->affected_rows()){
 						print "OK";
@@ -469,7 +483,7 @@ class Shedmodel extends CI_Model{
 					SET
 					staff_id = ?
 					WHERE
-					(service_calendar.id) IN (".implode($data, ", ").") AND
+					(service_calendar.id) IN (".implode(", ", $data).") AND
 					service_calendar.is_done", array($this->input->post('inst'), $this->input->post('cal'), $this->input->post('cal')));
 					if($this->db->affected_rows()){
 						print "OK";
@@ -488,8 +502,8 @@ class Shedmodel extends CI_Model{
 		$starthour = 8;
 		$endhour = 21;
 		$discretion = 30; // minutes
-		$q1 = 60 / $discretion; // planner period
-		$q2 = ($endhour -$starthour) * $q1; // planner length
+		$plannerPeriod = 60 / $discretion; // planner period
+		$plannerLength = ($endhour -$starthour) * $plannerPeriod; // planner length
 		$result = $this->db->query("SELECT 
 		DATE_FORMAT(`service_calendar`.ordered_date, '%d.%m.%Y') AS od,
 		TIME_FORMAT(`service_calendar`.ordered_time, '%H:%i') as st,
@@ -514,7 +528,15 @@ class Shedmodel extends CI_Model{
 		AND DATE_FORMAT(`service_calendar`.ordered_date, '%Y%m%d') >= DATE_FORMAT(NOW(), '%Y%m%d')
 		order by 
 		`service_calendar`.ordered_date,
-		`service_calendar`.ordered_time", array($starthour, $q1, $discretion, $starthour, $q1, $discretion, $this->session->userdata('userid')));
+		`service_calendar`.ordered_time", array(
+			$starthour,
+			$plannerPeriod,
+			$discretion,
+			$starthour,
+			$plannerPeriod,
+			$discretion,
+			$_SESSION['userid']
+		));
 		if($result->num_rows()){
 			foreach($result->result_array() as $row){
 				if(sizeof($data) > 10){
@@ -527,17 +549,17 @@ class Shedmodel extends CI_Model{
 			}
 		}
 		
-		/*for($i=0; $i<=$q2; $i++){
+		/*for($i=0; $i<=$plannerLength; $i++){
 			array_push($lines, '<td style="width:30px;text-align:center;">'.($starthour + ceil($i/2)).(($i%2) ? ":00" : ":30" ).'</td>');
 		}
 		*/
 		
 		foreach($data as $day=>$services){
-			array_push($lines, '<tr><td colspan="'.($q2).'" class="muted" style="font-size:16px;"><strong>'.$day.'</strong></td></tr>');
+			array_push($lines, '<tr><td colspan="'.($plannerLength).'" class="muted" style="font-size:16px;"><strong>'.$day.'</strong></td></tr>');
 			foreach($services as $service){
 				$line = array();
 				$span = ((int) $service['ote'] - (int) $service['ot']);
-				for($i=1; $i<=$q2; $i++){
+				for($i=1; $i<=$plannerLength; $i++){
 					if(($i > (int) $service['ot']) && ($i <= ((int) $service['ote']))){
 						$i = $i + $span;
 						$fin = 0;
@@ -549,26 +571,25 @@ class Shedmodel extends CI_Model{
 							$fin = 1;
 						}
 						$color = (hexdec($servcolor) > 800) ? '000' : 'fff' ;
-						array_push($line, '<td class="servData" colspan='.($span).' fin="'.$fin.'" ref="'.$service['id'].'" style="width:30px;text-align:center;color:#'.$color.';background-color:#'.$servcolor.';" title="'.implode(array($service['pat_fio'], "\nпроцедура: ".$service['serv_name'].";", "\nадрес: ".$service['pat_address'], $service['pat_location']), " ").'">'.$stext.'</td>');
+						array_push($line, '<td class="servData" colspan='.($span).' fin="'.$fin.'" ref="'.$service['id'].'" style="width:30px;text-align:center;color:#'.$color.';background-color:#'.$servcolor.';" title="'.implode(" ", array($service['pat_fio'], "\nпроцедура: ".$service['serv_name'].";", "\nадрес: ".$service['pat_address'], $service['pat_location'])).'">'.$stext.'</td>');
 						//array_push($line, '<td style="width:30px;text-align:center;background-color:#33cccc;">'.(8+(($i-1)*0.5)).'</td>');
 					}
-					if($i < $q2){
+					if($i < $plannerLength){
 						array_push($line, '<td style="width:30px;text-align:center;">-</td>');
 					}
 				}
-				array_push($lines, '<tr title="'.$service['serv_name'].'">'.implode($line, "\n").'</tr>');
+				array_push($lines, '<tr title="'.$service['serv_name'].'">'.implode("\n", $line).'</tr>');
 			}
 			
 
 		}
-			array_push($output, implode($lines,"\n"));
-		$outdata['content'] = implode($output, "\n");
+		array_push($output, implode("\n", $lines));
+		$outdata['content'] = implode("\n", $output);
 		return $this->load->view("proc/myshedule", $outdata, true);
 	}
 
 	public function pload($year, $month, $day){
 		//print $year.$month.$day;
-		//$this->output->enable_profiler(TRUE);
 		$input      = array();
 		$output     = array();
 		$staff      = array();
@@ -578,8 +599,8 @@ class Shedmodel extends CI_Model{
 		$starthour  = 8;
 		$endhour    = 21;
 		$discretion = 30; // minutes
-		$q1         = 60 / $discretion; // planner period
-		$q2         = ($endhour -$starthour) * $q1; // planner length
+		$plannerPeriod         = 60 / $discretion; // planner period
+		$plannerLength         = ($endhour -$starthour) * $plannerPeriod; // planner length
 
 		$result = $this->db->query("SELECT 
 		CONCAT(`staff`.staff_f, ' ', LEFT(`staff`.staff_i, 1), '.', LEFT(`staff`.staff_o, 1), '.') AS fio,
@@ -623,12 +644,12 @@ class Shedmodel extends CI_Model{
 		ORDER BY
 		service_calendar.ordered_date, service_calendar.ordered_time", array(
 			$starthour,
-			$q1,
+			$plannerPeriod,
 			$discretion,
 			$starthour,
-			$q1,
+			$plannerPeriod,
 			$discretion,
-			implode(array($year, $month, $day),"")
+			implode("", array($year, $month, $day))
 		));
 		if($result->num_rows()){
 			foreach($result->result() as $row){
@@ -648,14 +669,14 @@ class Shedmodel extends CI_Model{
 			}
 		}
 		$timeline = "";
-		for($i=1; $i<=$q2-2; $i++){
+		for($i=1; $i<=$plannerLength-2; $i++){
 			$timeline .= '<td style="font-size:10px;font-weight:bold;text-align:center;">'.($starthour + ceil($i/2)).(($i%2) ? ":00" : ":30" ).'</td>';
 		}
 		foreach($input as $key=>$staffdata){
 			$staffname = (isset($staff[$key])) ? $staff[$key] : "";
-			array_push($output, '<tr><td colspan="'.$q2.'"><h5 id="s'.$key.'">'.$staffname.'</h5></td></tr>');
+			array_push($output, '<tr><td colspan="'.$plannerLength.'"><h5 id="s'.$key.'">'.$staffname.'</h5></td></tr>');
 			$line = array();
-			for($i=1; $i<=$q2-2; $i++){
+			for($i=1; $i<=$plannerLength-2; $i++){
 				$color = '';
 				$class = array();
 				$title = '';
@@ -676,20 +697,20 @@ class Shedmodel extends CI_Model{
 					}else{
 						array_push($class, 'good');
 					}
-					$string = '<td title="'.$title.' - '.$busy[$key][$i][0][3].'" class="busy '.implode($class," ").'" servid="'.$busy[$key][$i][0][4].'" sref="s'.$key.'" ref="'.$busy[$key][$i][0][2].'" style="width:'.ceil(100/$q2).'%;">'.$text.'</td>';
+					$string = '<td title="'.$title.' - '.$busy[$key][$i][0][3].'" class="busy '.implode(" ", $class).'" servid="'.$busy[$key][$i][0][4].'" sref="s'.$key.'" ref="'.$busy[$key][$i][0][2].'" style="width:'.ceil(100/$plannerLength).'%;">'.$text.'</td>';
 				}else{
-					$string = '<td title="инструктор свободен" style="width:'.ceil(100/$q2).';text-align:center;">-</td>';
+					$string = '<td title="инструктор свободен" style="width:'.ceil(100/$plannerLength).';text-align:center;">-</td>';
 				}
 				array_push($line, $string);
 			}
-			array_push($output, '<tr>'.implode($line, "\n").'</tr>');
+			array_push($output, '<tr>'.implode("\n", $line).'</tr>');
 		}
 
 		$out['nextdate'] = date('Y/m/d', mktime(0, 0, 0, $month , $day+1 , $year));
 		$out['prevdate'] = date('Y/m/d', mktime(0, 0, 0, $month , $day-1 , $year));
-		$out['nowdate']  = implode(array($day, $month, $year), ".");
+		$out['nowdate']  = implode(".", array($day, $month, $year));
 		$out['timeline'] = '<tr>'.$timeline.'</tr>';
-		$out['content']  = implode($output, "\n");
+		$out['content']  = implode("\n", $output);
 		return $this->load->view("proc/pload", $out, true);
 	}
 
@@ -703,16 +724,16 @@ class Shedmodel extends CI_Model{
 		`service_calendar`.note = ?
 		WHERE
 		`service_calendar`.id = ?", array(
-			$this->session->userdata('userid'),
+			$_SESSION['userid'],
 			$this->input->post('comment', true),
 			(int) $this->input->post('calId', true)
 		));
 		if (!$nr){
 			$this->load->helper("url");
 			redirect("start");
-		}else{
-			print $this->input->post('calId', true);
+			return true;
 		}
+		print $this->input->post('calId', true);
 	}
 
 	public function jobundone(){
@@ -725,16 +746,16 @@ class Shedmodel extends CI_Model{
 		`service_calendar`.note = ?
 		WHERE
 		`service_calendar`.id = ?", array(
-			$this->session->userdata('userid'),
+			$_SESSION['userid'],
 			$this->input->post('comment', true),
 			(int) $this->input->post('calId', true)
 		));
 		if (!$nr){
 			$this->load->helper("url");
 			redirect("start");
-		}else{
-			print $this->input->post('calId', true);
+			return true;
 		}
+		print $this->input->post('calId', true);
 	}
 
 	public function shed_summary_get(){
@@ -748,11 +769,11 @@ class Shedmodel extends CI_Model{
 		$input['forw']   = 0;
 		$result = $this->db->query("SELECT
 		`services`.`id`,
-		COUNT(`service_calendar`.`id`) as `counts`,
 		`services`.serv_name,
+		`service_calendar`.is_done,
+		COUNT(`service_calendar`.`id`) as `counts`,
 		(SUM(`services`.serv_price) / 100) as ssum,
-		IF(DATEDIFF(NOW(), `service_calendar`.`ordered_date`) < 0, 0, 1) as missed,
-		`service_calendar`.is_done
+		IF(DATEDIFF(NOW(), `service_calendar`.`ordered_date`) < 0, 0, 1) as missed
 		FROM
 		`service_calendar`
 		INNER JOIN `services` ON (`service_calendar`.service_id = `services`.id)
@@ -776,9 +797,9 @@ class Shedmodel extends CI_Model{
 				}
 			}
 		}
-		$output['sdone']  = implode($input['sdone'],  "\n");
-		$output['sndone'] = implode($input['sndone'], "\n");
-		$output['missed'] = implode($input['missed'], "\n");
+		$output['sdone']  = implode("\n", $input['sdone']);
+		$output['sndone'] = implode("\n", $input['sndone']);
+		$output['missed'] = implode("\n", $input['missed']);
 		$output['forw']   = $input['forw'];
 		$output['back']   = $input['back'];
 		$output['done']   = $input['done'];
@@ -840,7 +861,7 @@ class Shedmodel extends CI_Model{
 				array_push($clients, $string);
 			}
 		}
-		$act['clients'] = implode($clients, "\n");
+		$act['clients'] = implode("\n", $clients);
 
 
 
@@ -909,11 +930,11 @@ class Shedmodel extends CI_Model{
 					}
 					$servname = ($row->service_id) ? $servlist[$row->service_id] : "Нецелевой платёж";
 					$dtype = ($row->dtype == "bso") ? "БСО" : "чек";
-					$string = '<tr class="'.implode($class, " ").'"><td>'.(sizeof($contracts[$row->c_id]['pm']) + 1).'</td><td>'.($row->sum).'</td><td>'.$row->gd.'</td><td>'.$servname.'</td><td>'.$dtype.': №  '.$row->dnum.'</td><td>'.$delbtn.'</td></tr>';
+					$string = '<tr class="'.implode(" ", $class).'"><td>'.(sizeof($contracts[$row->c_id]['pm']) + 1).'</td><td>'.($row->sum).'</td><td>'.$row->gd.'</td><td>'.$servname.'</td><td>'.$dtype.': №  '.$row->dnum.'</td><td>'.$delbtn.'</td></tr>';
 					array_push($contracts[$row->c_id]['pm'], $string);
 				}
 				foreach($contracts as $key => $val){
-					array_push($pay_out, implode($val['pm'], "\n"));
+					array_push($pay_out, implode("\n", $val['pm']));
 				}
 			}else{
 				array_push($pay_out, '<tr><td colspan=4>Нет данных о полученных платежах</td></tr>');
@@ -921,10 +942,10 @@ class Shedmodel extends CI_Model{
 		}
 
 		$act['client_id'] = $client_id;
-		$act['services']  = implode($services, "\n");
+		$act['services']  = implode("\n", $services);
 		$act['rest']      = $act['deposit'] - $act['paid'];
 		$act['deposit']   = $act['deposit'];
-		$act['payments']  = implode($pay_out, "\n");
+		$act['payments']  = implode("\n", $pay_out);
 		$act['servlist']  = $this->cli_serv_get($client_id);
 		return $this->load->view('proc/paytable', $act, true);
 	}
@@ -961,12 +982,16 @@ class Shedmodel extends CI_Model{
 				if(!isset($input[$row->contract_id])){
 					$conclass = array();
 					$ctitle   = array();
-					($row->cont_active) ? array_push($ctitle, "Контракт активен") : array_push($ctitle, "Контракт неактивен");
-					($row->cont_active) ? array_push($conclass, "success") : array_push($conclass, "danger");
+					($row->cont_active) 
+						? array_push($ctitle, "Контракт активен") 
+						: array_push($ctitle, "Контракт неактивен");
+					($row->cont_active) 
+						? array_push($conclass, "success")
+						: array_push($conclass, "danger");
 					$input[$row->contract_id] = array('<table class="table table-bordered table-condensed table-striped">
-					<tr class="'.implode($conclass, " ").'">
+					<tr class="'.implode(" ", $conclass).'">
 					<td colspan="5">
-						<a href="/contracts/show/'.$row->contract_id.'" target="_blank">Контракт №'.$row->cont_number.'&nbsp;&nbsp;&nbsp;<small>'.$row->ctm.'&nbsp;&nbsp;'.implode($ctitle, " ").'</small></a>
+						<a href="/contracts/show/'.$row->contract_id.'" target="_blank">Контракт №'.$row->cont_number.'&nbsp;&nbsp;&nbsp;<small>'.$row->ctm.'&nbsp;&nbsp;'.implode(" ", $ctitle).'</small></a>
 					</td>
 					</tr>
 					<tr>
@@ -981,15 +1006,25 @@ class Shedmodel extends CI_Model{
 				$srclass = array();
 				$rclass  = array();
 				$rtitle  = array();
-				($row->serv_active) ? "" : array_push($srclass, "muted");
-				($row->serv_active) ? array_push($rtitle, "Услуга оказывается")	: array_push($rtitle, "Услуга не оказывается");
-				($row->is_done) ? array_push($rclass, "success") : "";
-				($row->is_done) ? array_push($rtitle, "услуга оказана")			: array_push($rtitle, "услуга не оказана");
-				($row->is_done) ? $sum[$row->contract_id] += $row->pf			: "" ;
+				($row->serv_active)
+					? "" 
+					: array_push($srclass, "muted");
+				($row->serv_active) 
+					? array_push($rtitle, "Услуга оказывается")	
+					: array_push($rtitle, "Услуга не оказывается");
+				($row->is_done)
+					? array_push($rclass, "success") 
+					: "";
+				($row->is_done)
+					? array_push($rtitle, "услуга оказана")
+					: array_push($rtitle, "услуга не оказана");
+				($row->is_done) 
+					? $sum[$row->contract_id] += $row->pf
+					: "";
 
-				array_push($input[$row->contract_id], '<tr class="'.implode($rclass, " ").'" title="'.implode($rtitle, ", ").'">
+				array_push($input[$row->contract_id], '<tr class="'.implode(" ", $rclass).'" title="'.implode(" ", $rtitle).'">
 				<td>'.$row->dtm.'</td>
-				<td class="'.implode($srclass, " ").'">'.$row->serv_name.'</td>
+				<td class="'.implode(" ", $srclass).'">'.$row->serv_name.'</td>
 				<td style="width:150px;">'.$row->pf.' рублей</td>
 				<td>'.(($row->is_done) ? "Да" : "Нет").'</td>
 				<td style="width:150px;">'.(($row->is_done) ? "<strong>".$row->pf."</strong>" : "0.00").' рублей</td>
@@ -998,9 +1033,9 @@ class Shedmodel extends CI_Model{
 			
 		}
 		foreach($input as $key=>$val){
-			array_push($output, implode($val)."<tr><td colspan=3></td><td><strong>ИТОГО</strong></td><td><strong>".$sum[$key]." рублей</strong></td></tr></table>");
+			array_push($output, implode("", $val)."<tr><td colspan=3></td><td><strong>ИТОГО</strong></td><td><strong>".$sum[$key]." рублей</strong></td></tr></table>");
 		}
-		return implode($output, "\n");
+		return implode("\n", $output);
 	}
 
 }

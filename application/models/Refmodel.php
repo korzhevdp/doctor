@@ -8,17 +8,17 @@ class Refmodel extends CI_Model{
 
 	## STAFF CONTROL Section
 	# Получение данных по работнику 
-	public function staff_edit($id){
+	public function editStaff($staffID){
 		$serv = array();
 		$result = $this->db->query("SELECT 
 		`services`.`id`,
-		services.serv_alias,
-		services.serv_name,
+		`services`.serv_alias,
+		`services`.serv_name,
 		IF(`services`.`id` IN (SELECT `servordering`.`servid` FROM `servordering` WHERE `servordering`.`staffid` = ?), 1, 0) as ordered
 		FROM
-		services", array( $id ));
-		if($result->num_rows()){
-			foreach($result->result() as $row){
+		services", array( $staffID ));
+		if ( $result->num_rows() ) {
+			foreach ( $result->result() as $row ) {
 				$active = ($row->ordered) ? ' checked="checked"' : '' ;
 				$string = '<li><label><span class="text"><input type="checkbox" class="cbs" value="'.$row->id.'"'.$active.'>'.$row->serv_name.'</span></label></li>';
 				array_push($serv, $string);
@@ -31,7 +31,7 @@ class Refmodel extends CI_Model{
 		staff.staff_i,
 		staff.staff_o,
 		staff.staff_address,
-		DATE_FORMAT(staff.staff_birthdate, '%d.%m.%Y') AS staff_birthdate,
+		DATE_FORMAT(staff.staff_birthdate, '%Y-%m-%d') AS staff_birthdate,
 		DATEDIFF(NOW(), staff.staff_birthdate) AS date_diff,
 		staff.staff_staff,
 		staff.staff_phone,
@@ -41,7 +41,7 @@ class Refmodel extends CI_Model{
 		staff.staff_passport,
 		staff.staff_pass_s,
 		staff.staff_pass_n,
-		DATE_FORMAT(staff.staff_pass_issuedate, '%d.%m.%Y') AS staff_pass_issuedate,
+		DATE_FORMAT(staff.staff_pass_issuedate, '%Y-%m-%d') AS staff_pass_issuedate,
 		staff.staff_pass_issued,
 		staff.staff_edu,
 		staff.staff_note,
@@ -55,29 +55,29 @@ class Refmodel extends CI_Model{
 		users
 		RIGHT OUTER JOIN staff ON (users.id = staff.id)
 		WHERE
-		(staff.id = ?)", array( $id ));
-		if($result->num_rows()){
+		(staff.id = ?)", array( $staffID ));
+		if ( $result->num_rows() ) {
 			$row = $result->row_array();
-			if($row['encoded']){
+			if ( $row['encoded'] ) {
 				$row = $this->toolmodel->decrypt_an_array($row);
 			}
-			$row['serv'] = implode($serv, "\n");
+			$row['serv']   = implode("\n", $serv);
 			$row['actbtn'] = ($row['active']) 
-			? '<a class="btn btn-danger btn-act"  href="/refs/staff_deactivate/'.$row['id'].'">Уволить с работы</a>'
-			: '<a class="btn btn-warning btn-act" href="/refs/staff_activate/'.$row['id'].'">Восстановить на работе</a>';
+			? '<a class="btn btn-danger  btn-act" href="'.base_url().'refs/staff_deactivate/'.$row['id'].'">Уволить с работы</a>'
+			: '<a class="btn btn-warning btn-act" href="'.base_url().'refs/staff_activate/'.$row['id'].'">Восстановить на работе</a>';
 		}
 		return $this->load->view('refs/staffedit', $row, true);
 	}
 
 	# Извлечение списка работников
-	public function staff_list_get(){
+	public function getStaffList() {
 		//$this->output->enable_profiler(TRUE);
-		$act = array();
-		$output = array();
+		$act     = array();
+		$output  = array();
 		$output2 = array();
-		$result = $this->db->query("SELECT 
+		$result  = $this->db->query("SELECT 
 		`staff`.id,
-		CONCAT_WS(' ',`staff`.staff_f, `staff`.staff_i, `staff`.staff_o) as fio,
+		CONCAT_WS(' ',`staff`.staff_f, `staff`.staff_i, `staff`.staff_o) AS fio,
 		`staff`.staff_address,
 		`staff`.staff_rank,
 		`staff`.cio,
@@ -94,18 +94,32 @@ class Refmodel extends CI_Model{
 		FROM
 		`staff`
 		ORDER BY staff.active DESC, staff.cio DESC, fio ASC");
-		if($result->num_rows()){
-			foreach($result->result_array() as $row){
-				$row['class']  = ($row['active'])					? "" : " error";
-				$row['class'] .= ($row['cio'])						? " success" : "";
-				$row['title']  = ($row['active'])					? "" : "Уволен. ";
-				$row['ico']    = ($row['cio'])						? '<img src="/images/cio.png" width="16" height="16" border="0" alt="boss" title="Руководитель">' : "";
-				$row['ico']   .= ((int) $row['staff_rank'] == 1)	? '<img src="/images/trainee.png" width="16" height="16" border="0" alt="boss" title="Стажёр">'   : "";
-				$row['ico']   .= ((int) $row['staff_rank'] == 2)	? '<img src="/images/medic.png" width="16" height="16" border="0" alt="boss" title="Инструктор">' : "";
-				($row['active']) ? array_push($output, $this->load->view('refs/stafftablerow', $row, true)) : array_push($output2, $this->load->view('refs/stafftablerow', $row, true));
+		if ( $result->num_rows() ) {
+			foreach ( $result->result_array() as $row ) {
+				$row['class']  = ($row['active'])
+					? "" 
+					: " error";
+				$row['class'] .= ($row['cio'])
+					? " success"
+					: "";
+				$row['title']  = ($row['active'])
+					? "" 
+					: "Уволен. ";
+				$row['ico']    = ($row['cio'])
+					? '<img src="'.base_url().'images/cio.png" width="16" height="16" border="0" alt="boss" title="Руководитель">'
+					: "";
+				$row['ico']   .= ((int) $row['staff_rank'] == 1)
+					? '<img src="'.base_url().'images/trainee.png" width="16" height="16" border="0" alt="boss" title="Стажёр">'
+					: "";
+				$row['ico']   .= ((int) $row['staff_rank'] == 2)
+					? '<img src="'.base_url().'images/medic.png" width="16" height="16" border="0" alt="boss" title="Инструктор">' 
+					: "";
+				($row['active']) 
+					? array_push($output,  $this->load->view('refs/stafftablerow', $row, true)) 
+					: array_push($output2, $this->load->view('refs/stafftablerow', $row, true));
 			}
-			$act['table']			= implode($output, "\n");
-			$act['inactivetable']	= implode($output2, "\n");
+			$act['table']			= implode("\n", $output );
+			$act['inactivetable']	= implode("\n", $output2);
 			return $this->load->view('refs/staff', $act, true);
 		}
 		return "Данные не найдены. Невозможно построить список сотрудников";
@@ -118,13 +132,13 @@ class Refmodel extends CI_Model{
 			$this->input->post('staff_i', true),
 			$this->input->post('staff_o', true),
 			$this->input->post('address', true),
-			implode(array_reverse(explode(".", $this->input->post('birth', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('birth', true)))),
 			$this->input->post('staff', true),
 			$this->input->post('phone', true),
 			$this->input->post('email', true),
 			$this->input->post('pass_s', true),
 			$this->input->post('pass_n', true),
-			implode(array_reverse(explode(".", $this->input->post('pass_issuedate', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('pass_issuedate', true)))),
 			$this->input->post('pass_issued', true),
 			$this->input->post('note', true),
 			$this->input->post('inn', true),
@@ -134,9 +148,9 @@ class Refmodel extends CI_Model{
 			$this->input->post('edu', true),
 			$this->input->post('staffid', true)
 		);
-		//$data = $this->toolmodel->encrypt_an_array($data, $this->session->userdata('hash1'));
+		//$data = $this->toolmodel->encrypt_an_array($data, $_SESSION['hash1')];
 		//print_r($data);
-		//$data = $this->toolmodel->decrypt_an_array($data, $this->session->userdata('hash1'));
+		//$data = $this->toolmodel->decrypt_an_array($data, $_SESSION['hash1')];
 		//print_r($data);
 		//$this->output->enable_profiler(TRUE);
 		//return false;
@@ -175,11 +189,15 @@ class Refmodel extends CI_Model{
 			`servordering`(
 				`servordering`.servid,
 				`servordering`.staffid
-			) VALUES".implode($services, ","));
+			) VALUES".implode(",", $services));
 		}
-		$this->toolmodel->insert_audit("Сохранён профиль сотрудника ".implode(array($this->input->post('staff_f'), $this->input->post('staff_i'), $this->input->post('staff_o')), " "));
+		$this->toolmodel->insert_audit("Сохранён профиль сотрудника ".implode(" ", array(
+			$this->input->post('staff_f'),
+			$this->input->post('staff_i'),
+			$this->input->post('staff_o')
+		)));
 		$this->load->helper("url");
-		redirect("refs/staff_edit/".$this->input->post('staffid'));
+		redirect("refs/editStaff/".$this->input->post('staffid'));
 	}
 
 	# Вставка данных нового работника
@@ -214,7 +232,7 @@ class Refmodel extends CI_Model{
 			$this->input->post('staff_i', true),
 			$this->input->post('staff_o', true),
 			$this->input->post('address', true),
-			implode(array_reverse(explode(".", $this->input->post('birth', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('birth', true)))),
 			$this->input->post('staff', true),
 			$this->input->post('phone', true),
 			$this->input->post('email', true),
@@ -222,7 +240,7 @@ class Refmodel extends CI_Model{
 			$this->input->post('location', true),
 			$this->input->post('pass_s', true),
 			$this->input->post('pass_n', true),
-			implode(array_reverse(explode(".", $this->input->post('pass_issuedate', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('pass_issuedate', true)))),
 			$this->input->post('pass_issued', true),
 			$this->input->post('edu', true),
 			$this->input->post('note', true),
@@ -244,7 +262,7 @@ class Refmodel extends CI_Model{
 			`servordering`(
 				`servordering`.servid,
 				`servordering`.staffid
-			) VALUES".implode($services, ","));
+			) VALUES".implode(",", $services));
 		}
 		if(
 			$this->input->post('username') 
@@ -263,7 +281,7 @@ class Refmodel extends CI_Model{
 				$sID
 			));
 		}
-		$this->toolmodel->insert_audit("Добавлен профиль сотрудника ".implode(array($this->input->post('staff_f'), $this->input->post('staff_i'), $this->input->post('staff_o')), " ")." присвоен ID:".$sID);
+		$this->toolmodel->insert_audit("Добавлен профиль сотрудника ".implode(" ", array($this->input->post('staff_f'), $this->input->post('staff_i'), $this->input->post('staff_o')))." присвоен ID:".$sID);
 		$this->load->helper("url");
 		//$this->output->enable_profiler(TRUE);
 		redirect("refs/staff");
@@ -273,7 +291,7 @@ class Refmodel extends CI_Model{
 
 	## SUPPLIERS CONTROL Section
 	# Получение данных по поставщику
-	public function supp_edit($id){
+	public function editSupplier ( $supplierID ) {
 		$result = $this->db->query("SELECT 
 		`suppliers`.sid,
 		`suppliers`.supp_f,
@@ -285,18 +303,18 @@ class Refmodel extends CI_Model{
 		`suppliers`.supp_email,
 		`suppliers`.supp_note,
 		`suppliers`.supp_address,
-		(`suppliers`.supp_royalty /100) AS supp_royalty,
+		(`suppliers`.supp_royalty / 100) AS supp_royalty,
 		`suppliers`.active
 		FROM
 		`suppliers`
-		WHERE `suppliers`.sid = ?", array( $id ));
-		if($result->num_rows()){
+		WHERE `suppliers`.sid = ?", array( $supplierID ));
+		if ( $result->num_rows() ) {
 			$row = $result->row();
 		}
 		return $this->load->view('refs/supplieredit', $row, true);
 	}
 	# Получение данных счёта поставщика
-	public function supp_billing_get($sid){
+	public function getSupplierBilling ( $supplierID ) {
 		//$this->output->enable_profiler(TRUE);
 		$output = array();
 		$result = $this->db->query("SELECT 
@@ -306,7 +324,7 @@ class Refmodel extends CI_Model{
 		FROM
 		`suppliers`
 		WHERE
-		`suppliers`.`sid` = ?", array($sid));
+		`suppliers`.`sid` = ?", array($supplierID));
 		if($result->num_rows()){
 			$row = $result->row();
 			array_push($output, '<h3>'.$row->fio.'&nbsp;&nbsp;&nbsp;&nbsp;<small>тел. '.$row->supp_phone.'</small></h3><hr>Размер вознаграждения: <strong>'.$row->supp_royalty.'%</strong><br><br>');
@@ -325,26 +343,27 @@ class Refmodel extends CI_Model{
 		services.m_active
 		FROM
 		service_calendar
-		LEFT OUTER JOIN contracts   ON (service_calendar.contract_id = contracts.id)
-		LEFT OUTER JOIN courses     ON (contracts.crsid = courses.id)
-		LEFT OUTER JOIN services    ON (service_calendar.contract_id = services.id)
-		LEFT OUTER JOIN `patients`  ON (courses.pid = `patients`.id)
-		LEFT OUTER JOIN `suppliers` ON (`patients`.pat_directed_by = `suppliers`.sid)
+		LEFT OUTER JOIN contracts   ON (service_calendar.contract_id = `contracts`.id)
+		LEFT OUTER JOIN courses     ON (contracts.crsid              = `courses`.id)
+		LEFT OUTER JOIN services    ON (service_calendar.contract_id = `services`.id)
+		LEFT OUTER JOIN `patients`  ON (courses.pid                  = `patients`.id)
+		LEFT OUTER JOIN `suppliers` ON (`patients`.pat_directed_by   = `suppliers`.sid)
 		WHERE
 		(`suppliers`.`sid` = ?)
 		ORDER BY
-		service_calendar.ordered_date", array($sid));
+		service_calendar.ordered_date", array($supplierID));
 		$this->load->model("crsmodel");
 		array_push($output, $this->crsmodel->report_serv($result, 1, $row->supp_royalty));
-		return implode($output, "\n");
+		return implode("\n", $output);
 	}
+
 	# Извлечение списка поставщиков
-	public function supp_list_get(){
+	public function getSuppliersList(){
 		//$this->output->enable_profiler(TRUE);
-		$act = array();
+		$act    = array();
 		$output = array();
 		$result = $this->db->query("SELECT 
-		CONCAT_WS(' ', `suppliers`.supp_f, `suppliers`.supp_i, `suppliers`.supp_o) as fio,
+		CONCAT_WS(' ', `suppliers`.supp_f, `suppliers`.supp_i, `suppliers`.supp_o) AS fio,
 		`suppliers`.supp_orgname,
 		`suppliers`.supp_staff,
 		`suppliers`.supp_phone,
@@ -359,22 +378,22 @@ class Refmodel extends CI_Model{
 			foreach($result->result() as $row){
 				$class = ($row->active) ? "" : " error";
 				$string = '<tr class="'.$class.'" ref="'.$row->sid.'" title="Поставщики">
-					<td class="supprow"><a href="/refs/supp_edit/'.$row->sid.'">'.$row->fio.'</a><br><small class="muted">'.$row->supp_orgname.'</small></td>
+					<td class="supprow"><a href="'.base_url().'refs/editSupplier/'.$row->sid.'">'.$row->fio.'</a><br><small class="muted">'.$row->supp_orgname.'</small></td>
 					<td class="supprow">'.$row->supp_staff.'</td>
 					<td class="supprow">'.$row->supp_address.'</td>
 					<td class="supprow">'.$row->supp_phone.'<br>'.$row->supp_email.'</td>
 					<td style="vertical-align:middle;text-align:center;">
-					<a href="/refs/suppliers_billing/'.$row->sid.'" class="btn btn-primary btn-mini" title="Детализация счёта поставщика"><i class="icon-signal icon-white"></i> Детализация счёта</a>
+					<a href="'.base_url().'refs/suppliers_billing/'.$row->sid.'" class="btn btn-primary btn-mini" title="Детализация счёта поставщика"><i class="icon-signal icon-white"></i> Детализация счёта</a>
 					</td>
 				</tr>';
 				array_push($output, $string);
 			}
 		}
-		$act['table'] = implode($output, "\n");
+		$act['table'] = implode("\n", $output);
 		return $this->load->view('refs/suppliers', $act, true);
 	}
 	# сохранение поставщика
-	public function supp_save(){
+	public function saveSupplier(){
 		$result = $this->db->query("UPDATE
 		suppliers
 		SET
@@ -440,7 +459,7 @@ class Refmodel extends CI_Model{
 
 	## CLIENTS CONTROL Section
 	# Получение данных по клиентам
-	public function client_item_get(){
+	public function client_item_get() {
 		$output = "clientdata = {}";
 		$result = $this->db->query("SELECT 
 		`clients`.id,
@@ -461,32 +480,32 @@ class Refmodel extends CI_Model{
 		FROM
 		`clients`
 		WHERE `clients`.id = ?", array( (int) $this->input->post("clientid")));
-		if($result->num_rows()){
+		if ( $result->num_rows() ) {
 			$row = $result->row();
 			$output = "clientdata = {
-			id: '".$row->id."',
-			client_f: '".$row->cli_f."',
-			client_i: '".$row->cli_i."',
-			client_o: '".$row->cli_o."',
-			address: '".$row->cli_address."',
-			pass_s: '".$row->cli_pass_s."',
-			pass_n: '".$row->cli_pass_n."',
-			pass_issued: '".$row->cli_pass_issued."',
-			pass_issuedate: '".$row->cli_pass_issuedate."',
-			note: '".$row->cli_note."',
-			directed: '".$row->directed_by."',
-			cphone: '".$row->cli_cphone."',
-			hphone: '".$row->cli_hphone."',
-			email: '".$row->cli_mail."',
-			active: ".$row->active."
+			id				: '".$row->id."',
+			client_f		: '".$row->cli_f."',
+			client_i		: '".$row->cli_i."',
+			client_o		: '".$row->cli_o."',
+			address			: '".$row->cli_address."',
+			pass_s			: '".$row->cli_pass_s."',
+			pass_n			: '".$row->cli_pass_n."',
+			pass_issued		: '".$row->cli_pass_issued."',
+			pass_issuedate	: '".$row->cli_pass_issuedate."',
+			note			: '".$row->cli_note."',
+			directed		: '".$row->directed_by."',
+			cphone			: '".$row->cli_cphone."',
+			hphone			: '".$row->cli_hphone."',
+			email			: '".$row->cli_mail."',
+			active			: ".$row->active."
 			};\n";
 		}
 		return $output;
-		//return $output."dirlist = '".implode($directed_list, "")."'";
+		//return $output."dirlist = '".implode("", $directed_list)."'";
 	}
 
 	# Извлечение списка клиентов
-	public function clients_list_get(){
+	public function getClientsList() {
 		//$this->output->enable_profiler(TRUE);
 		$act = array();
 		$output   = array();
@@ -505,7 +524,7 @@ class Refmodel extends CI_Model{
 					$patients[$row->pat_clientid] = array();
 				}
 				$string = '<li>
-					<a title="Открыть пациента" href="/refs/pat_edit/'.$row->id.'" target="_blank" class="patrow" ref="'.$row->id.'">'.$row->fio.'</a>
+					<a title="Открыть пациента" href="'.base_url().'refs/pat_edit/'.$row->id.'" target="_blank" class="patrow" ref="'.$row->id.'">'.$row->fio.'</a>
 				</li>';
 				array_push($patients[$row->pat_clientid], $string);
 			}
@@ -528,7 +547,7 @@ class Refmodel extends CI_Model{
 		clients.active DESC, fio");
 		if($result->num_rows()){
 			foreach($result->result() as $row){
-				$datafull = ($row->cli_datafull) ? '<img src="/images/tick.png" width="16" height="16" border="0" alt="">' : '<img src="/images/docerror.png" title="Данные клиента неполны для оформления контракта" width="16" height="16" border="0" alt="">';
+				$datafull = ($row->cli_datafull) ? '<img src="'.base_url().'images/tick.png" width="16" height="16" border="0" alt="">' : '<img src="'.base_url().'images/docerror.png" title="Данные клиента неполны для оформления контракта" width="16" height="16" border="0" alt="">';
 				$is_blocked = ($row->active) ? "": " error";
 				$string = '<tr class="'.$is_blocked.'">
 						<td colspan=6>
@@ -538,7 +557,7 @@ class Refmodel extends CI_Model{
 					<tr class="'.$is_blocked.'" title="Клиенты">
 					<td class="clientrow" ref="'.$row->id.'">
 						Пациенты:
-						<ul>'.(isset($patients[$row->id]) ? implode($patients[$row->id]): '').'</ul>
+						<ul>'.(isset($patients[$row->id]) ? implode("", $patients[$row->id]): '').'</ul>
 					</td>
 					<td class="clientrow" ref="'.$row->id.'">'.$row->supplier.'</td>
 					<td class="clientrow" ref="'.$row->id.'">'.$row->cli_address.'</td>
@@ -548,18 +567,18 @@ class Refmodel extends CI_Model{
 					<td class="clientrow fullycentered" ref="'.$row->id.'">'.$datafull.'</td>
 					<td class="fullycentered">
 						<!-- <button class="btn btn-success btn-mini clientEdit" ref="'.$row->id.'" title="Редактировать данные"><i class="icon-edit icon-white"></i></button> -->
-						<a class="btn btn-success btn-mini" href="/refs/client_edit/'.$row->id.'" title="Редактировать данные"><i class="icon-edit icon-white"></i></a>
+						<a class="btn btn-success btn-mini" href="'.base_url().'refs/client_edit/'.$row->id.'" title="Редактировать данные"><i class="icon-edit icon-white"></i></a>
 					</td>
 				</tr>';
 				($row->active) ? array_push($output, $string) : array_push($outputinactive, $string);
 			}
 		}
-		$act['table'] = implode($output, "\n");
-		$act['tableinactive'] = implode($outputinactive, "\n");
+		$act['table']         = implode("\n", $output);
+		$act['tableinactive'] = implode("\n", $outputinactive);
 		return $this->load->view('refs/clients', $act, true);
 	}
 	
-	public function client_edit($item = 0){
+	public function editClient( $clientID = 0 ){
 		//print $item;
 		//$this->output->enable_profiler(TRUE);
 		$result = $this->db->query("SELECT 
@@ -583,44 +602,44 @@ class Refmodel extends CI_Model{
 		FROM
 		`clients`
 		WHERE 
-		`clients`.id = ?", array($item));
+		`clients`.id = ?", array($clientID));
 		if($result->num_rows()){
-			$clidata = $result->row_array();
+			$clientData = $result->row_array();
 		}
-		$clidata['actbtn'] = ($clidata['active']) 
-			? '<a class="btn btn-danger"  href="/refs/client_deactivate/'.$clidata['id'].'">Сделать клиента неактивным</a>'
-			: '<a class="btn btn-warning" href="/refs/client_activate/'.$clidata['id'].'">Сделать клиента активным</a>';
+		$clientData['actbtn'] = ($clientData['active']) 
+			? '<a class="btn btn-danger"  href="'.base_url().'refs/deactivateClient/'.$clientData['id'].'">Сделать клиента неактивным</a>'
+			: '<a class="btn btn-warning" href="'.base_url().'refs/activateClient/'.$clientData['id'].'">Сделать клиента активным</a>';
 
 		//print_r($servdata);
-		return $this->load->view('refs/clientedit', $clidata, true);
+		return $this->load->view('refs/clientedit', $clientData, true);
 	}
 
 	# сохранение клиента
-	public function client_save(){
+	public function saveClient() {
 		$result = $this->db->query("UPDATE
 		clients
 		SET
-		clients.cli_f = TRIM(?),
-		clients.cli_i = TRIM(?),
-		clients.cli_o = TRIM(?),
-		clients.cli_pass_s = TRIM(?),
-		clients.cli_pass_n = TRIM(?),
-		clients.cli_pass_issued = TRIM(?),
-		clients.cli_pass_issuedate = TRIM(?),
-		clients.cli_cphone = TRIM(?),
-		clients.cli_hphone = TRIM(?),
-		clients.cli_mail = TRIM(?),
-		clients.cli_address = TRIM(?),
-		clients.cli_note = TRIM(?),
-		clients.cli_card = TRIM(?)
-		WHERE `clients`.`id` = ?" , array(
+		clients.cli_f				= TRIM(?),
+		clients.cli_i				= TRIM(?),
+		clients.cli_o				= TRIM(?),
+		clients.cli_pass_s			= TRIM(?),
+		clients.cli_pass_n			= TRIM(?),
+		clients.cli_pass_issued		= TRIM(?),
+		clients.cli_pass_issuedate	= TRIM(?),
+		clients.cli_cphone			= TRIM(?),
+		clients.cli_hphone			= TRIM(?),
+		clients.cli_mail			= TRIM(?),
+		clients.cli_address			= TRIM(?),
+		clients.cli_note			= TRIM(?),
+		clients.cli_card			= TRIM(?)
+		WHERE `clients`.`id`		= ?" , array(
 			$this->input->post('client_f', true),
 			$this->input->post('client_i', true),
 			$this->input->post('client_o', true),
 			$this->input->post('pass_s', true),
 			$this->input->post('pass_n', true),
 			$this->input->post('pass_issued', true),
-			implode(array_reverse(explode(".", $this->input->post('pass_issuedate', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('pass_issuedate', true)))),
 			$this->input->post('cphone', true),
 			$this->input->post('hphone', true),
 			$this->input->post('email', true),
@@ -630,18 +649,19 @@ class Refmodel extends CI_Model{
 			$this->input->post('clientid', true)
 		));
 		// проверка на целостность
-		$this->datafull_c_check($this->input->post('clientid', true));
+		$this->checkClientDataFullness($this->input->post('clientid', true));
 
 		if($this->input->post('ajax') == 'applied'){
 			print "saved";
-		}else{
-			$this->load->helper("url");
-			//$this->output->enable_profiler(TRUE);
-			redirect("refs/clients");
+			return true;
 		}
+
+		$this->load->helper("url");
+		//$this->output->enable_profiler(TRUE);
+		redirect("refs/clients");
 	}
 
-	public function datafull_c_check($cid){
+	public function checkClientDataFullness($cid){
 		$this->db->query("UPDATE clients SET 
 		clients.cli_datafull = IF(
 		LENGTH(clients.cli_f) AND
@@ -660,7 +680,7 @@ class Refmodel extends CI_Model{
 	}
 
 	# Вставка данных нового клиента
-	public function client_item_add(){
+	public function addNewClient() {
 		$result = $this->db->query("INSERT INTO
 		clients (
 			clients.cli_f,
@@ -682,7 +702,7 @@ class Refmodel extends CI_Model{
 			$this->input->post('pass_s', true),
 			$this->input->post('pass_n', true),
 			$this->input->post('pass_issued', true),
-			implode(array_reverse(explode(".", $this->input->post('pass_issuedate', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('pass_issuedate', true)))),
 			$this->input->post('cphone', true),
 			$this->input->post('hphone', true),
 			$this->input->post('email', true),
@@ -690,25 +710,25 @@ class Refmodel extends CI_Model{
 			$this->input->post('note', true)
 		));
 		$cid = $this->db->insert_id();
-		$this->datafull_c_check($cid);
-		if($this->input->post('ajax') == 'applied'){
+		$this->checkClientDataFullness($cid);
+		if ( $this->input->post('ajax') == 'applied' ) {
 			print $cid;
-		}else{
-			$this->load->helper("url");
-			redirect("refs/clients");
+			return true;
 		}
+		$this->load->helper("url");
+		redirect("refs/clients");
 	}
 	## CLIENTS CONTROL Section END
 	############################################################################
 
 	## PATIENTS CONTROL Section
 	# Получение данных по клиентам
-	public function patients_list_get(){
+	public function getPatientsList() {
 		//$this->output->enable_profiler(TRUE);
-		$act = array();
-		$output = array();
+		$act     = array();
+		$output  = array();
 		$output2 = array();
-		$result = $this->db->query("SELECT
+		$result  = $this->db->query("SELECT
 		patients.id,
 		clients.id AS client_id,
 		suppliers.sid AS supp_id,
@@ -731,17 +751,29 @@ class Refmodel extends CI_Model{
 		ORDER BY 
 		patients.active DESC,
 		fio");
-		if($result->num_rows()){
-			foreach($result->result_array() as $row){
-				$row['supplier'] = (strlen($row['supp_id'])) ? $row['supp_fio'] : "Поставщик нуждается в уточнении";
-				$row['is_blocked'] = ($row['active']) ? "" : " error" ;
-				$row['errors'] = ($row['datafull']) ? '<img src="/images/tick.png" width="16" height="16" border="0" alt="">' : '<img src="/images/error.png" width="16" height="16" border="0" alt="" title="Данные неполны. Проверьте карточки пациента и клиента">' ;
-				$row['errors'] .= ($row['crscount']) ? '' : '&nbsp;<img src="/images/docerror.png" width="16" height="16" border="0" alt="" class="createCrs" ref="'.$row['id'].'" style="cursor:pointer;" title="Курс не сопоставлен. Создание договоров невозможно.">';
-				($row['active']) ? array_push($output, $this->load->view('refs/patientdata', $row, true)) : array_push($output2, $this->load->view('refs/patientdata', $row, true));
+		if ( $result->num_rows() ) {
+			foreach ( $result->result_array() as $row ) {
+				$row['supplier'] = (strlen($row['supp_id'])) 
+					? $row['supp_fio'] 
+					: "Поставщик нуждается в уточнении";
+				$row['is_blocked'] = ($row['active']) 
+					? "" 
+					: " error" ;
+				$row['errors'] = ($row['datafull']) 
+					? '<img src="'.base_url().'images/tick.png"  width="16" height="16" border="0" alt="">' 
+					: '<img src="'.base_url().'images/error.png" width="16" height="16" border="0" alt="" title="Данные неполны. Проверьте карточки пациента и клиента">' ;
+				$row['errors'] .= ($row['crscount']) 
+					? '' 
+					: '&nbsp;<img src="'.base_url().'images/docerror.png" width="16" height="16" border="0" alt="" class="createCrs" ref="'.$row['id'].'" style="cursor:pointer;" title="Курс не сопоставлен. Создание договоров невозможно.">';
+				($row['active']) 
+					? array_push($output,  $this->load->view('refs/patientdata', $row, true)) 
+					: array_push($output2, $this->load->view('refs/patientdata', $row, true));
 			}
 		}
-		$act['table'] = implode($output, "\n");
-		$act['tableinactive'] = implode($output2, "\n");
+		$act = array(
+			'table'         => implode("\n", $output),
+			'tableinactive' => implode("\n", $output2)
+		);
 		return $this->load->view('refs/patients', $act, true);
 	}
 
@@ -841,28 +873,19 @@ class Refmodel extends CI_Model{
 				array_push($clients_list, $string);
 			}
 		}
-		return "dirlist = '".implode($directed_list, "")."';\ncl_list = '".implode($clients_list, "")."'";
+		return "dirlist = '".implode("", $directed_list)."';\ncl_list = '".implode("", $clients_list)."'";
 	}
 
-	public function pat_edit($item){
-		$result = $this->db->query("SELECT 
-		patients.id,
-		patients.pat_f,
-		patients.pat_i,
-		patients.pat_o,
-		patients.pat_address,
-		patients.pat_location,
-		DATE_FORMAT(patients.pat_birthdate, '%d.%m.%Y') AS pat_birthdate,
-		IF(ISNULL(patients.pat_birthdate),
-			patients.pat_age,
-			YEAR(NOW()) - YEAR(patients.pat_birthdate) - (
-				IF(DATE_FORMAT(NOW(), '%m%d') >= DATE_FORMAT(patients.pat_birthdate, '%m%d'), 0, 1)
-			)
-		) as pat_age,
-		REPLACE(REPLACE(patients.pat_info, '\r', ''), '\n', ' ') AS pat_info,
-		patients.pat_directed_by,
-		patients.pat_clientid,
-		DATE_FORMAT(`patients`.pat_pass_issuedate, '%d.%m.%Y') AS pat_pass_issuedate,
+	public function editPatient( $patientID ) {
+		$result = $this->db->query("SELECT
+		`patients`.id,
+		`patients`.pat_f,
+		`patients`.pat_i,
+		`patients`.pat_o,
+		`patients`.pat_address,
+		`patients`.pat_location,
+		`patients`.pat_directed_by,
+		`patients`.pat_clientid,
 		`patients`.pat_pass_issued,
 		`patients`.pat_pass_n,
 		`patients`.pat_pass_s,
@@ -870,15 +893,26 @@ class Refmodel extends CI_Model{
 		`patients`.pat_cphone,
 		`patients`.pat_hphone,
 		`clients`.cli_mail,
-		REPLACE(REPLACE(patients.pat_diagnosis, '\r', ''), '\n', ' ') AS pat_diagnosis
+		DATE_FORMAT(patients.pat_birthdate, '%Y-%m-%d')					AS pat_birthdate,
+		DATE_FORMAT(`patients`.pat_pass_issuedate, '%Y-%m-%d')			AS pat_pass_issuedate,
+		REPLACE(REPLACE(patients.pat_info, '\r', ''), '\n', ' ')		AS pat_info,
+		REPLACE(REPLACE(patients.pat_diagnosis, '\r', ''), '\n', ' ')	AS pat_diagnosis,
+		IF(ISNULL(patients.pat_birthdate),
+			patients.pat_age,
+			YEAR(NOW()) - YEAR(patients.pat_birthdate) - (
+				IF(DATE_FORMAT(NOW(), '%m%d') >= DATE_FORMAT(patients.pat_birthdate, '%m%d'), 0, 1)
+			)
+		)																AS pat_age
 		FROM
 		patients
 		LEFT OUTER JOIN `clients` ON (patients.pat_clientid = `clients`.id)
-		WHERE `patients`.id = ?", array((int)$item));
-		if($result->num_rows()){
+		WHERE `patients`.id = ?", array( 
+			(int) $patientID 
+		));
+		if ( $result->num_rows() ) {
 			$row = $result->row_array();
 			$suppliers = array();
-			$result = $this->db->query("SELECT 
+			$result = $this->db->query("SELECT
 			suppliers.sid,
 			suppliers.supp_f,
 			suppliers.supp_i,
@@ -889,11 +923,11 @@ class Refmodel extends CI_Model{
 			if($result->num_rows()){
 				foreach($result->result() as $row2){
 					//print $row['pat_directed_by']." == ".$row2->sid."<br>";
-					$string = '<option'.(($row['pat_directed_by'] == $row2->sid) ? ' selected="selected"' : '').' value="'.$row2->sid.'">'.implode(array($row2->supp_f, $row2->supp_i, $row2->supp_o), " ").'</option>';
+					$string = '<option'.(($row['pat_directed_by'] == $row2->sid) ? ' selected="selected"' : "").' value="'.$row2->sid.'">'.implode(" ", array($row2->supp_f, $row2->supp_i, $row2->supp_o)).'</option>';
 					array_push($suppliers, $string);
 				}
 			}
-			$row['supp'] = implode($suppliers, "\n");
+			$row['suppliers'] = implode("\n", $suppliers);
 
 			$clients = array();
 			$result  = $this->db->query("SELECT 
@@ -904,21 +938,20 @@ class Refmodel extends CI_Model{
 			from
 			`clients`
 			ORDER BY CONCAT(`clients`.cli_f,`clients`.cli_i,`clients`.cli_o)");
-			if($result->num_rows()){
+			if ( $result->num_rows() ) {
 				foreach($result->result() as $row2){
 					//print $row['pat_directed_by']." == ".$row2->sid."<br>";
-					$string = '<option'.(($row['pat_clientid'] == $row2->id) ? ' selected="selected"' : '').' value="'.$row2->id.'">'.implode(array($row2->cli_f, $row2->cli_i, $row2->cli_o), " ").'</option>';
+					$string = '<option'.(($row['pat_clientid'] == $row2->id) ? ' selected="selected"' : "").' value="'.$row2->id.'">'.implode(" ", array($row2->cli_f, $row2->cli_i, $row2->cli_o)).'</option>';
 					array_push($clients, $string);
 				}
 			}
-			$row['cli'] = implode($clients, "\n");
+			$row['cli']    = implode("\n", $clients);
 			$row['actbtn'] = ($row['active']) 
-				? '<a id="patActivator" class="btn btn-danger"  title="Снять пациента с учёта" href="/refs/pat_deactivate/'.$row['id'].'">Снять с учёта</a>'
-				: '<a id="patActivator" class="btn btn-warning" title="Пометить активной административно" href="/refs/pat_activate/'.$row['id'].'">Вернуть на учёт</a>';
+				? '<a id="patActivator" class="btn btn-danger"  title="Снять пациента с учёта" href="'.base_url().'refs/pat_deactivate/'.$row['id'].'">Снять с учёта</a>'
+				: '<a id="patActivator" class="btn btn-warning" title="Пометить активной административно" href="'.base_url().'refs/pat_activate/'.$row['id'].'">Вернуть на учёт</a>';
 			return $this->load->view('refs/patientedit', $row, true);
-		}else{
-			return "<h3>Такого пациента не зайдено!</h3>";
 		}
+		return "<h3>Такого пациента не зайдено!</h3>";
 	}
 
 	public function pat_save(){
@@ -926,23 +959,23 @@ class Refmodel extends CI_Model{
 		$result = $this->db->query("UPDATE
 		`patients`
 		SET
-		patients.pat_f = TRIM(?),
-		patients.pat_i = TRIM(?),
-		patients.pat_o = TRIM(?),
-		patients.pat_clientid = ?,
-		patients.pat_directed_by = ?,
-		patients.pat_address = TRIM(?),
-		patients.pat_birthdate = TRIM(?),
-		patients.pat_diagnosis = TRIM(?),
-		patients.pat_info = TRIM(?),
-		patients.pat_location = TRIM(?),
-		patients.pat_pass_s = TRIM(?),
-		patients.pat_pass_n = TRIM(?),
-		patients.pat_pass_issued = TRIM(?),
-		patients.pat_pass_issuedate = TRIM(?),
-		patients.pat_cphone = TRIM(?),
-		patients.pat_hphone = TRIM(?),
-		patients.pat_complaints = TRIM(?)
+		patients.pat_f				= TRIM(?),
+		patients.pat_i				= TRIM(?),
+		patients.pat_o				= TRIM(?),
+		patients.pat_clientid		= ?,
+		patients.pat_directed_by	= ?,
+		patients.pat_address		= TRIM(?),
+		patients.pat_birthdate		= TRIM(?),
+		patients.pat_diagnosis		= TRIM(?),
+		patients.pat_info			= TRIM(?),
+		patients.pat_location		= TRIM(?),
+		patients.pat_pass_s			= TRIM(?),
+		patients.pat_pass_n			= TRIM(?),
+		patients.pat_pass_issued	= TRIM(?),
+		patients.pat_pass_issuedate	= TRIM(?),
+		patients.pat_cphone			= TRIM(?),
+		patients.pat_hphone			= TRIM(?),
+		patients.pat_complaints		= TRIM(?)
 		WHERE
 		patients.id = ?", array(
 			$this->input->post('pat_f', true),
@@ -951,22 +984,22 @@ class Refmodel extends CI_Model{
 			$this->input->post('clientid', true),
 			$this->input->post('directed', true),
 			$this->input->post('address', true),
-			implode(array_reverse(explode(".", $this->input->post('birth', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('birth', true)))),
 			$this->input->post('diagnosis', true),
 			$this->input->post('info', true),
 			$this->input->post('location', true),
 			$this->input->post('pass_s', true),
 			$this->input->post('pass_n', true),
 			$this->input->post('pass_issued', true),
-			implode(array_reverse(explode(".", $this->input->post('pass_issuedate', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('pass_issuedate', true)))),
 			$this->input->post('cphone', true),
 			$this->input->post('hphone', true),
 			$this->input->post('complaints', true),
 			$this->input->post('patid', true)
 		));
-		$this->datafull_p_check($this->input->post('patid'));
-		//print "x,";
-		if($this->input->post('ajax') == 'applied'){
+		$this->checkPatientDataFullness($this->input->post('patid'));
+
+		if ( $this->input->post('ajax') == 'applied' ) {
 			$result = $this->db->query("SELECT 
 			CONCAT_WS(',', clients.cli_datafull, patients.datafull) AS df
 			FROM
@@ -980,11 +1013,10 @@ class Refmodel extends CI_Model{
 				}
 			}
 			print $this->input->post('patid');
-		}else{
-			$this->load->helper("url");
-			//$this->output->enable_profiler(TRUE);
-			redirect("refs/patients");
+			return true;
 		}
+		$this->load->helper("url");
+		redirect("refs/patients");
 	}
 
 	public function pat_item_add(){
@@ -1013,66 +1045,68 @@ class Refmodel extends CI_Model{
 			$this->input->post('clientid', true),
 			$this->input->post('directed', true),
 			$this->input->post('address', true),
-			implode(array_reverse(explode(".", $this->input->post('birth', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('birth', true)))),
 			$this->input->post('diagnosis', true),
 			$this->input->post('note', true),
 			$this->input->post('location', true),
 			$this->input->post('pass_s', true),
 			$this->input->post('pass_n', true),
 			$this->input->post('pass_issued', true),
-			implode(array_reverse(explode(".", $this->input->post('pass_issuedate', true))), "-"),
+			implode("-", array_reverse(explode(".", $this->input->post('pass_issuedate', true)))),
 			$this->input->post('complaints', true),
 		));
 		$pid = $this->db->insert_id();
 		// проверка на целостность данных
-		$this->datafull_p_check($pid);
+		$this->checkPatientDataFullness($pid);
 		// добавление курса лечения
-		print $this->add_p_course($pid).",";
+		print $this->addCourseToPatient($pid).",";
 		$this->db->trans_complete();
 
-		if($this->input->post('ajax') == 'applied'){
-			$result = $this->db->query("SELECT 
+		if ( $this->input->post('ajax') == 'applied' ) {
+			$result = $this->db->query("SELECT
 			CONCAT_WS( ',', clients.cli_datafull, patients.datafull) AS df
 			FROM
 			patients
 			INNER JOIN clients ON (patients.pat_clientid = clients.id)
 			WHERE
 			`patients`.`id` = ?", array($pid));
-			if($result->num_rows()){
-				foreach($result->result() as $row){
+			if ( $result->num_rows() ) {
+				foreach ( $result->result() as $row ) {
 					print $row->df.",";
 				}
 			}
 			print $pid;
-		}else{
-			$this->load->helper("url");
-			//$this->output->enable_profiler(TRUE);
-			redirect("refs/patients");
+			return true;
 		}
+		$this->load->helper("url");
+		redirect("refs/patients");
 	}
 
-	public function datafull_p_check($pid){
+	public function checkPatientDataFullness( $patientID ) {
 		$this->db->query("UPDATE patients SET 
 		patients.datafull = IF(
-			LENGTH(patients.pat_f) AND
-			LENGTH(patients.pat_i) AND
-			LENGTH(patients.pat_o) AND
-			LENGTH(patients.pat_clientid) AND
-			LENGTH(patients.pat_address) AND
-			LENGTH(patients.pat_pass_s) AND
-			LENGTH(patients.pat_pass_n) AND
-			LENGTH(patients.pat_pass_issued) AND
-			LENGTH(patients.pat_pass_issuedate),
-		1, 0) WHERE patients.id = ?", array($pid));
+			LENGTH(patients.pat_f) 
+			AND LENGTH(patients.pat_i) 
+			AND LENGTH(patients.pat_o)
+			AND LENGTH(patients.pat_clientid)
+			AND LENGTH(patients.pat_address)
+			AND LENGTH(patients.pat_pass_s)
+			AND LENGTH(patients.pat_pass_n)
+			AND LENGTH(patients.pat_pass_issued)
+			AND LENGTH(patients.pat_pass_issuedate),
+		1, 0)
+		WHERE patients.id = ?", array( $patientID ) );
 	}
 
-	public function add_p_course($pid){
+	public function addCourseToPatient( $patientID ) {
 		$this->db->query("INSERT INTO
-		`courses`(
-			pid,
-			startdate,
-			active
-		) VALUES (?, NOW(), 1)", array($pid));
+		`courses` (
+			`courses`.pid,
+			`courses`.startdate,
+			`courses`.active
+		) VALUES (?, NOW(), 1)", array(
+			$patientID
+		));
 		return $this->db->insert_id();
 	}
 
@@ -1131,9 +1165,9 @@ class Refmodel extends CI_Model{
 				array_push($output, $this->load->view('refs/servtablerow', $row, true));
 			}
 		}
-		$act['table'] = implode($output, "\n");
-		$act['inactivetable'] = implode($output2, "\n");
-		$act['minactivetable'] = implode($output3, "\n");
+		$act['table']          = implode("\n", $output);
+		$act['inactivetable']  = implode("\n", $output2);
+		$act['minactivetable'] = implode("\n", $output3);
 		return $this->load->view('refs/services', $act, true);
 	}
 
@@ -1173,7 +1207,7 @@ class Refmodel extends CI_Model{
 		return $output;
 	}
 
-	public function serv_save(){
+	public function saveService(){
 		//$this->output->enable_profiler(TRUE);
 		$result = $this->db->query("UPDATE
 		services
@@ -1203,7 +1237,7 @@ class Refmodel extends CI_Model{
 			}
 			$this->db->query("DELETE FROM servordering WHERE servordering.servid = ?", array($this->input->post('servid', true)));
 			if(sizeof($ordering)){
-				$this->db->query("INSERT INTO servordering (servordering.servid, servordering.staffid) VALUES ".implode($ordering, ",\n"));
+				$this->db->query("INSERT INTO servordering (servordering.servid, servordering.staffid) VALUES ".implode(",\n", $ordering));
 			}
 		}else{
 			$this->db->query("UPDATE services SET services.active = 0 WHERE services.id = ?", array($this->input->post('servid', true)));
@@ -1219,10 +1253,10 @@ class Refmodel extends CI_Model{
 		WHERE services.id = ?", array($this->input->post('servid', true)));
 		$this->load->helper("url");
 		//$this->output->enable_profiler(TRUE);
-		redirect("refs/serv_edit/".$this->input->post('servid', true));
+		redirect("refs/editService/".$this->input->post('servid', true));
 	}
 
-	public function serv_edit($item = 0){
+	public function editService($item = 0){
 		//print $item;
 		//$this->output->enable_profiler(TRUE);
 		$serv = array();
@@ -1267,9 +1301,9 @@ class Refmodel extends CI_Model{
 		<option value="home1" '.(($servdata['serv_loc'] == 'home1') ? 'selected="selected"' : "").'>На дому (в пределах 15 км от КАД)</option>
 		<option value="home2" '.(($servdata['serv_loc'] == 'home2') ? 'selected="selected"' : "").'>На дому (в пределах 40 км от КАД)</option>';
 		$servdata['actbtn'] = ($servdata['m_active']) 
-		? '<a id="servActivator" class="btn btn-danger"  title="Пометить неактивной административно" href="/refs/serv_deactivate/'.$servdata['id'].'">Сделать услугу неактивной</a>'
-		: '<a id="servActivator" class="btn btn-warning" title="Пометить активной административно"   href="/refs/serv_activate/'.$servdata['id'].'">Сделать услугу активной</a>';
-		$servdata['ordering'] = implode($serv, "\n");
+		? '<a id="servActivator" class="btn btn-danger"  title="Пометить неактивной административно" href="'.base_url().'refs/serv_deactivate/'.$servdata['id'].'">Сделать услугу неактивной</a>'
+		: '<a id="servActivator" class="btn btn-warning" title="Пометить активной административно"   href="'.base_url().'refs/serv_activate/'.$servdata['id'].'">Сделать услугу активной</a>';
+		$servdata['ordering'] = implode("\n", $serv);
 		//print_r($servdata);
 		return $this->load->view('refs/serviceedit', $servdata, true);
 	}
@@ -1298,7 +1332,7 @@ class Refmodel extends CI_Model{
 		redirect("refs/services");
 	}
 
-	public function serv_avail_check(){
+	public function checkServiceAvailability(){
 		$result = $this->db->query("SELECT 
 		services.id,
 		COUNT(staff.id) AS counts

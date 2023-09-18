@@ -22,8 +22,8 @@
 <h2>Нагрузка на инструкторов&nbsp;&nbsp;&nbsp;&nbsp;<small"><input class="withCal" id="dateLoad" type="text" value="<?=$nowdate;?>"><span class="btn btn-info btn-mini" id="dateShow">Показать</span></small></h2>
 <table class="table table-bordered">
 <tr>
-	<td>&nbsp;&nbsp;<a class="btn btn-info pull-left" href="/shedule/pload/<?=$prevdate;?>">Назад</a></td>
-	<td><a class="btn btn-info pull-right" href="/shedule/pload/<?=$nextdate;?>">Далее</a>&nbsp;&nbsp;</td>
+	<td>&nbsp;&nbsp;<a class="btn btn-info pull-left" href="<?=base_url();?>shedule/pload/<?=$prevdate;?>">Назад</a></td>
+	<td><a class="btn btn-info pull-right" href="<?=base_url();?>shedule/pload/<?=$nextdate;?>">Далее</a>&nbsp;&nbsp;</td>
 </tr>
 </table>
 <table class="table table-bordered">

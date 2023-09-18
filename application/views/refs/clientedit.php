@@ -15,8 +15,8 @@
 	}
 </style>
 
-<h4>Редактирование клиента&nbsp;&nbsp;&nbsp;<small><?=implode(array($cli_f, $cli_i, $cli_o), " ");?></small></h4><hr>
-<form method="post" id="clientDataForm" action="/refs/client_save" enctype="multipart/form-data" class="form-inline row-fluid">
+<h4>Редактирование клиента&nbsp;&nbsp;&nbsp;<small><?=implode(" ", array($cli_f, $cli_i, $cli_o));?></small></h4><hr>
+<form method="post" id="clientDataForm" action="<?=base_url();?>refs/client_save" enctype="multipart/form-data" class="form-inline row-fluid">
 	<table class="cliDataTable table table-condensed">
 	<tr>
 		<td class="col1">Фамилия</td>
@@ -73,7 +73,7 @@
 		</td>
 	</tr>
 	</table>
-	<input type="hidden" id="clientID" name="clientid" value="<?=$id?>" />
+	<input type="hidden" id="clientID" name="clientid" value="<?=$id?>">
 </form>
 <?=$actbtn?>
 <button type="submit" class="btn btn-primary" id="clientDataSave">Сохранить</button>

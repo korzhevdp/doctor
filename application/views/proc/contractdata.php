@@ -31,11 +31,11 @@
 				</tr>
 				<tr>
 					<td style="width:160px;padding-left:15px;">Дата подписания</td>
-					<td><input type="text" name="datestart" form="servDataForm" id="datestart" class="withCal" placeholder="Укажите дату подписания (заключения) контракта" tabindex=4></td>
+					<td><input type="date" name="datestart" form="servDataForm" id="datestart" class="withCal" placeholder="Укажите дату подписания (заключения) контракта" tabindex=4></td>
 				</tr>
 				<tr>
 					<td style="width:160px;padding-left:15px;">Дата окончания</td>
-					<td><input type="text" name="dateend" form="servDataForm" id="dateend" class="readonly" placeholder="Выберите дату окончания" tabindex=5 readonly></td>
+					<td><input type="date" name="dateend" form="servDataForm" id="dateend" class="readonly" placeholder="Выберите дату окончания" tabindex=5 readonly></td>
 				</tr>
 				</table>
 			</div>
@@ -209,11 +209,13 @@
 	function get_contract_data(cnt){
 		$("#servContList").empty();
 		$.ajax({
-			url: "/contracts/cnt_data_get",
-			data: { cnt: cnt },
-			type: "POST",
-			dataType: 'script',
-			success: function(){
+			url      : "<?=base_url();?>contracts/getContractData",
+			data     : {
+				cnt  : cnt
+			},
+			type     : "POST",
+			dataType : 'script',
+			success  : function() {
 				b = 0;
 				$("#number").val(contract.data.num);
 				$("#datestart").val(contract.data.start);
@@ -224,8 +226,8 @@
 				$("#client").change();
 				$("#patient option[value='" + contract.data.patient + "']").attr("selected", "selected");
 				//$("#contEditor").modal('show');
-				$("#cont_href").attr('href'  , '/docs/cg/'  + contract.data.id);
-				$("#cont_a_href").attr('href', '/docs/cag/' + contract.data.id);
+				$("#cont_href").attr('href'  , '<?=base_url();?>/docs/cg/'  + contract.data.id);
+				$("#cont_a_href").attr('href', '<?=base_url();?>/docs/cag/' + contract.data.id);
 				//alert(contract.data.signed);
 				(contract.data.signed) ? $("#contUnderwrite").attr("disabled", "disabled") : $("#contUnderwrite").removeAttr("disabled");
 				serv = contract.services;

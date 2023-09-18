@@ -33,7 +33,7 @@
 	}
 </style>
 
-<h3>Персонал&nbsp;&nbsp;&nbsp;<small>список</small><a href="/refs/new_staff" class="btn btn-warning btn-small pull-right" style="margin-right:10px;">+ Добавить</a></h3>
+<h3>Персонал&nbsp;&nbsp;&nbsp;<small>список</small><a href="<?=base_url();?>refs/new_staff" class="btn btn-warning btn-small pull-right" style="margin-right:10px;">+ Добавить</a></h3>
 
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#tab1" id="htab1" data-toggle="tab">Сотрудники</a></li>
@@ -130,7 +130,7 @@
 		function deactivate_staff(){
 			staffid = $("#staffID").val();
 			$.ajax({
-				url: "/refs/staff_deactivate",
+				url: "<?=base_url();?>refs/staff_deactivate",
 				type: "POST",
 				data: { staffid: staffid },
 				success: function(){
@@ -145,7 +145,7 @@
 		function activate_staff(){
 			staffid = $("#staffID").val();
 			$.ajax({
-				url: "/refs/staff_activate",
+				url: "<?=base_url();?>refs/staff_activate",
 				type: "POST",
 				data: { staffid: staffid },
 				success: function(){

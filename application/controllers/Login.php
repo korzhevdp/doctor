@@ -4,16 +4,17 @@ class Login extends CI_Controller {
 
 	public function __construct(){
 		parent::__construct();
+		session_start();
 		$this->load->model("loginmodel");
 		$this->load->model("toolmodel");
 	}
 
 	public function index(){
-		if($this->input->post('name') && $this->input->post('pass')){
+		if ( $this->input->post('name') && $this->input->post('pass') ) {
 			$this->loginmodel->_test_user();
-		}else{
-			$this->load->view("login/login_view");
+			return true;
 		}
+		$this->load->view("login/login_view");
 	}
 
 	public function logout(){

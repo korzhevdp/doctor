@@ -2,7 +2,7 @@
 
 
 <div>
-	<form method="post" id="servDataForm" action="/contracts/cnt_save" enctype="multipart/form-data" class="form-inline row-fluid">
+	<form method="post" id="servDataForm" action="<?=base_url();?>contracts/cnt_save" enctype="multipart/form-data" class="form-inline row-fluid">
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#tab1" data-toggle="tab">Общие</a></li>
 			<li><a href="#tab2" data-toggle="tab">Услуги</a></li>
@@ -33,7 +33,7 @@
 				</tr>
 				<tr>
 					<td>Дата начала</td>
-					<td><input type="text" name="datestart" id="datestart" class="withCal" placeholder="Выберите дату начала" tabindex=4></td>
+					<td><input type="date" name="datestart" id="datestart" placeholder="Выберите дату начала" tabindex=4></td>
 				</tr>
 				</table>
 			</div>
@@ -42,7 +42,7 @@
 				<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<td colspan=4>Начало оказания услуг&nbsp;&nbsp;<input type="text" name="servstart" id="servstart" class="withCal"></td>
+						<td colspan=4>Начало оказания услуг&nbsp;&nbsp;<input type="date" name="servstart" id="servstart"></td>
 					</tr>
 					<tr>
 						<th style="width:220px;">Услуга</th>
@@ -121,7 +121,7 @@
 	function cnt_initdata_get(){
 		$("#editorHeader").html('Создание контракта');
 		$.ajax({
-			url: "/contracts/cnt_initdata_get",
+			url: "<?=base_url();?>contracts/cnt_initdata_get",
 			type: "POST",
 			dataType: 'script',
 			success: function(){
@@ -147,7 +147,7 @@
 		var cli = $(this).val();
 		if(cli != "0"){
 			$.ajax({
-				url: "/contracts/rel_pats_get",
+				url: "<?=base_url();?>contracts/rel_pats_get",
 				data: { cli: cli },
 				type: "POST",
 				dataType: 'script',
@@ -155,7 +155,7 @@
 					$("#patient").empty().append(data);
 					$("#contEditor").modal('show');
 					// зачотный костыль из другой функции :)
-					if(typeof contract != 'undefined' && typeof contract.data.patient != 'undefined'){
+					if ( typeof contract !== undefined && typeof contract.data.patient !== undefined ){
 						$("#patient option[value='" + contract.data.patient + "']").attr("selected", "selected");
 					}
 					if($("#pStrict").val() != 0){

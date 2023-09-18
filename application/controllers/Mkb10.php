@@ -40,13 +40,13 @@ class Mkb10 extends CI_Controller {
 				$cl = array($row->section);
 				(strlen($row->subsection)) ? array_push($cl, $row->subsection) : "";
 				(strlen($row->subsection2)) ? array_push($cl, $row->subsection2) : "";
-				$content = $row->lit.' '.implode($cl, ".").$row->sign." ".$row->content;
+				$content = $row->lit.' '.implode(".", $cl).$row->sign." ".$row->content;
 				//$content = trim(str_replace("\n", "", str_replace("\r", "", $content)));
 				$string = $row->id.": {e: '".$excl."', i: '".$incl."', n: '".$note."', t: '".$content."'}";
 				array_push($output, $string);
 			}
 		}
-		print "mkbdata = {\n".implode($output, ",\n")."\n}";
+		print "mkbdata = {\n".implode(",\n", $output)."\n}";
 	}
 
 	public function getbytext(){

@@ -14,7 +14,7 @@
 	</div>
 	<div class="modal-body">
 		<div id="patInfoText"></div>
-		<center style="margin-top:15px;">
+		<center>
 			<button class="btn btn-large btn-warning" data-dismiss="modal" aria-hidden="true" id="jobDone" style="margin-right:75px;">Исполнено</button>
 			<button class="btn btn-large" data-dismiss="modal" aria-hidden="true">Закрыть</button>
 		</center>
@@ -27,12 +27,12 @@
 	</div>
 	<div class="modal-body">
 		<div id="jobInfoText"></div>
-		<form method="post" action="/shedule/jobdone" id="jobform">
+		<form method="post" action="<?=base_url();?>shedule/jobdone" id="jobform">
 			<h5>Комментарий, замечания</h5>
 			<textarea name="comment" style="width:96%; height:100px;" rows="5" cols="6"></textarea>
 			<input type="hidden" name="calId" id="calId">
 		</form>
-		<center style="margin-top:15px;">
+		<center>
 			<button class="btn btn-large btn-primary" id="jobDoneF" style="margin-right:75px;">Отправить</button>
 			<button class="btn btn-large" data-dismiss="modal" aria-hidden="true">Закрыть</button>
 		</center>

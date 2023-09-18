@@ -4,7 +4,8 @@ class Shedule extends CI_Controller {
 
 	function __construct(){
 		parent::__construct();
-		if(!$this->session->userdata('userid')){
+		session_start();
+		if ( !isset($_SESSION['userid']) ) {
 			$this->load->helper("url");
 			redirect("login");
 			exit;
@@ -13,8 +14,8 @@ class Shedule extends CI_Controller {
 		$this->load->model("toolmodel");
 		$prefs = array (
 			'show_next_prev'=> TRUE,
-			'next_prev_url' => '/shedule/show/',
-			'start_day' => 'monday'
+			'next_prev_url' => base_url().'/shedule/show/',
+			'start_day'     => 'monday'
 		);
 		$this->load->library('calendar', $prefs);
 	}
@@ -57,7 +58,6 @@ class Shedule extends CI_Controller {
 	}
 
 	public function savetime(){
-		//$this->output->enable_profiler(TRUE);
 		$this->shedmodel->savetime();
 	}
 

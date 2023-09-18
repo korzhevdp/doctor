@@ -23,7 +23,7 @@
 
 <h4><span id="editorHeader">Редактирование данных пациента</span>&nbsp;&nbsp;&nbsp;</h4>
 
-<form method="post" id="patDataForm" action="/refs/pat_save" enctype="multipart/form-data" class="form-inline row-fluid">
+<form method="post" id="patDataForm" action="<?=base_url();?>refs/pat_save" enctype="multipart/form-data" class="form-inline row-fluid">
 	<ul class="nav nav-tabs">
 		<li class="active"><a href="#tab1" id="htab1" data-toggle="tab">Пациент</a></li>
 		<li><a href="#tab2" id="htab2" data-toggle="tab">Информация для врача</a></li>
@@ -78,7 +78,7 @@
 			</tr>
 			<tr class="info">
 				<td>Паспорт, дата выдачи</td>
-				<td><input type="text" name="pass_issuedate" id="pass_issuedate" tab="1" class="withCal" tabindex=12  value="<?=$pat_pass_issuedate;?>"></td>
+				<td><input type="date" name="pass_issuedate" id="pass_issuedate" tab="1" tabindex=12  value="<?=$pat_pass_issuedate;?>"></td>
 			</tr>
 			</table>
 			<input type="hidden" id="patID" name="patid" value="<?=$id?>" />
@@ -88,7 +88,7 @@
 				<tr>
 					<td class="col1">Дата рождения</td>
 					<td>
-						<input type="text" name="birth" id="birth" tab="2" class="withCal" tabindex=4 value="<?=$pat_birthdate;?>">
+						<input type="date" name="birth" id="birth" tab="2" tabindex=4 value="<?=$pat_birthdate;?>">
 					</td>
 				</tr>
 				<tr>
@@ -114,7 +114,7 @@
 					<td>
 						<select name="directed" id="directed">
 							<option value="0"> -- Не указан -- </option>
-							<?=$supp;?>
+							<?=$suppliers;?>
 						</select>
 					</td>
 				</tr>

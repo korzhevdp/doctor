@@ -4,8 +4,8 @@ class Courses extends CI_Controller {
 
 	function __construct(){
 		parent::__construct();
-		//$this->output->enable_profiler(TRUE);
-		if(!$this->session->userdata('userid')){
+		session_start();
+		if ( !isset($_SESSION['userid']) ) {
 			$this->load->helper("url");
 			redirect("login");
 			exit;
@@ -27,11 +27,11 @@ class Courses extends CI_Controller {
 		$this->load->view('view', $output);
 	}
 
-	public function item($id = 0){
-		array_push($this->class, array("Описание курса лечения", "/courses/item/".$id));
+	public function item($courseID = 0) {
+		array_push( $this->class, array("Описание курса лечения", base_url()."courses/item/".$courseID) );
 		$output = array(
 			'menu'    => $this->load->view('menu', array(), true),
-			'content' => $this->crsmodel->crs_item_get($id),
+			'content' => $this->crsmodel->getCourseItem($courseID),
 			'bc'	  => $this->toolmodel->get_bc($this->class)
 		);
 		$this->load->view('view', $output);

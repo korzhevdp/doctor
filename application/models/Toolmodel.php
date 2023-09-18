@@ -28,7 +28,7 @@ class Toolmodel extends CI_Model{
 				: '<li class="active"><a href="#">'.$val[0].'</a></li>' ;
 			array_push($output, $string);
 		}
-		return '<ul class="breadcrumb">'.implode($output, "\n").'</ul>';
+		return '<ul class="breadcrumb">'.implode("\n", $output).'</ul>';
 	}
 
 	##########################################################################

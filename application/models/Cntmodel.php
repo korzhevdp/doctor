@@ -5,117 +5,135 @@ class Cntmodel extends CI_Model{
 		parent::__construct();
 	}
 	// извлечение списка контрактов
-	public function cnt_list_get($cli = 0, $pat = 0){
+	public function getContractsList($cli = 0, $pat = 0){
 		$output = array(
 			'active'   => array(),
 			'inactive' => array()
 		);
-		$cont_serv = $this->cntListServicesGet();
+		$cont_serv = $this->getContractServicesList();
 
 		$result = $this->db->query("SELECT 
-		`contracts`.id AS contid,
 		`contracts`.cont_number,
-		DATE_FORMAT(`contracts`.cont_date_start, '%d.%m.%Y г.') AS cont_date_start,
-		IF(LENGTH(`contracts`.cont_date_end), DATE_FORMAT(`contracts`.cont_date_end, '%d.%m.%Y г.'), 'Контракт открыт') AS cont_date_end,
 		`contracts`.active,
 		`contracts`.signed,
+		`contracts`.id														AS contractID,
 		`clients`.cli_cphone,
 		`clients`.cli_hphone,
 		`clients`.cli_address,
 		`clients`.cli_mail,
 		`clients`.cli_note,
-		`clients`.id AS clid,
-		`patients`.id AS patid,
+		`clients`.id														AS clid,
+		`patients`.id														AS patid,
 		`patients`.pat_address,
+		`patients`.pat_diagnosis,
 		IF(ISNULL(patients.pat_birthdate),
 			patients.pat_age,
 			YEAR(NOW()) - YEAR(patients.pat_birthdate) - (
 				IF(DATE_FORMAT(NOW(), '%m%d') >= DATE_FORMAT(patients.pat_birthdate, '%m%d'), 0, 1)
 			)
-		) as pat_age,
-		`patients`.pat_diagnosis,
-		CONCAT_WS(' ',`clients`.cli_f,`clients`.cli_i,`clients`.cli_o) AS cli_fio,
-		CONCAT_WS(' ',`patients`.pat_f,`patients`.pat_i,`patients`.pat_o) AS pat_fio
+		)																	AS pat_age,
+		DATE_FORMAT(`contracts`.cont_date_start, '%d.%m.%Y г.')				AS cont_date_start,
+		IF(LENGTH(`contracts`.cont_date_end),
+			DATE_FORMAT(`contracts`.cont_date_end, '%d.%m.%Y г.'),
+			'Контракт открыт'
+		)																	AS cont_date_end,
+		CONCAT_WS(' ',`clients`.cli_f,`clients`.cli_i,`clients`.cli_o)		AS cli_fio,
+		CONCAT_WS(' ',`patients`.pat_f,`patients`.pat_i,`patients`.pat_o)	AS pat_fio
 		FROM
 		`contracts`
-		LEFT OUTER JOIN `courses` ON (`contracts`.crsid = `courses`.id)
-		LEFT OUTER JOIN `patients` ON (`patients`.id = `courses`.pid)
-		LEFT OUTER JOIN `clients` ON (`patients`.pat_clientid = `clients`.id)
+		LEFT OUTER JOIN `courses`	ON (`contracts`.crsid		= `courses`.id)
+		LEFT OUTER JOIN `patients`	ON (`patients`.id			= `courses`.pid)
+		LEFT OUTER JOIN `clients`	ON (`patients`.pat_clientid = `clients`.id)
 		ORDER BY `contracts`.active DESC, cli_fio");
-		if ($result->num_rows()) {
+		if ( $result->num_rows() ) {
 			foreach($result->result_array() as $row){
-				$row['services'] = (isset($cont_serv[$row['contid']])) ? implode($cont_serv[$row['contid']], "\n") : "";
+				$row['services'] = ( isset($cont_serv[$row['contractID']]) )
+					? implode("\n", $cont_serv[$row['contractID']]) 
+					: "";
 				$item = $this->load->view('proc/contractinfo', $row, true);
-				($row['active']) ? array_push($output['active'], $item) : array_push($output['inactive'], $item);
+				($row['active'])
+					? array_push($output['active'],   $item) 
+					: array_push($output['inactive'], $item);
 			}
 		} else {
 			array_push($output['active'], '<tr><td colspan="6"><h4>Данные о контрактах не найдены.<br><a href="#" class="contAdder">Создайте хотя бы один</a> и выберите оказываемые по нему услуги.</h4>');
 		}
+
 		$act = array(
-			'table'         => implode($output['active'], "\n"),
-			'tableinactive' => implode($output['inactive'], "\n"),
+			'table'         => implode("\n", $output['active']),
+			'tableinactive' => implode("\n", $output['inactive']),
 			'cstrict'       => $cli,
 			'pstrict'       => $pat
 		);
 		return $this->load->view('proc/contracts', $act, true);
 	}
 
-	private function cntListServicesGet() {
+	private function getContractServicesList() {
 		$output = array();
 		# Собираем услуги по контракту
 		$result = $this->db->query("SELECT
 		IF(LENGTH(`services`.serv_alias), `services`.serv_alias, '<strong>No Alias!</strong>') AS serv_alias,
 		`services`.active,
 		`services`.id,
-		`contract_services`.cont_id
+		`contract_services`.cont_id AS contractID
 		FROM
 		`contract_services`
 		INNER JOIN `services` ON (`contract_services`.serv_id = `services`.id)");
-		if($result->num_rows()){
-			foreach($result->result() as $row) {
-				if (!isset($output[$row->cont_id])) {
-					$output[$row->cont_id] = array();
+		if ( $result->num_rows() ) {
+			foreach ( $result->result() as $row) {
+				if ( !isset( $output[$row->contractID] ) ) {
+					$output[$row->contractID] = array();
 				}
-				$title  = "Услуга не может быть оказана";
-				$marker = '<i class="icon-exclamation-sign"></i>&nbsp;&nbsp;';
-				if ($row->active) {
-					$title  = "Услуга может быть оказана";
-					$marker = "";
-				}
-				$string = '<li title="'.$title.'"><a href="/refs/serv_edit/'.$row->id.'">'.$marker.$row->serv_alias.'</a></li>';
-				array_push($output[$row->cont_id], $string);
+				$title  = ($row->active)
+					? "Услуга может быть оказана"
+					: "Услуга не может быть оказана";
+				$marker = ($row->active)
+					? ""
+					: '<i class="icon-exclamation-sign"></i>&nbsp;&nbsp;';
+
+				$string = '<li title="'.$title.'"><a href="'.base_url().'refs/serv_edit/'.$row->id.'">'.$marker.$row->serv_alias.'</a></li>';
+				array_push($output[$row->contractID], $string);
 			}
 		}
 		return $output;
 	}
 	// конец извлечения списка контрактов
-
-	public function cnt_get($contractID){
+	
+	/*
+	public function getContractData($contractID){
 		$act       = array('cid' => $contractID);
 		/*
 		работа этого модуля построена на AJAX. Обмен данными реализован на вьюхе.
-		*/
+		/
 		return $this->load->view('proc/contractdata', $act, true);
 	}
+	*/
+
 	//сохранение контракта
 	public function cnt_save(){
 		//$this->output->enable_profiler(TRUE);
 		//return false;
 		// подготовка данных
-		$cID          = $this->input->post("cID", true);
+		$contractID   = $this->input->post("cID", true);
 		$c_number     = $this->input->post("number", true);
-		$datestart    = strlen($this->input->post("datestart")) ? implode(array_reverse(explode(".", $this->input->post("datestart", true))), "-") : date("Y-m-d");
-		$dateend      = strlen($this->input->post("dateend"))   ? implode(array_reverse(explode(".", $this->input->post("dateend",   true))), "-") : "0000-00-00";
-		$servstart    = strlen($this->input->post("servstart")) ? implode(array_reverse(explode(".", $this->input->post("servstart", true))), "-") : date("Y-m-d");
-		$shedule_corr = array();
+		$datestart    = strlen($this->input->post("datestart")) 
+			? implode("-", array_reverse(explode(".", $this->input->post("datestart", true))))
+			: date("Y-m-d");
+		$dateend      = strlen($this->input->post("dateend"))   
+			? implode("-", array_reverse(explode(".", $this->input->post("dateend",   true))))
+			: "0000-00-00";
+		$servstart    = strlen($this->input->post("servstart")) 
+			? implode("-", array_reverse(explode(".", $this->input->post("servstart", true))))
+			: date("Y-m-d");
+		$schedule_corr = array();
 		//$sdate        = explode("-", $servstart);
 		//$servstart_wd = date('w', mktime(0, 0, 0, $sdate[1], $sdate[2], $sdate[0]));
 		//
 		//$wd = ($this->input->post("wd")) ? 0 : 1 ;
-		if($cID){
+		if ( $contractID ) {
 			// если передан ID контракта, значит исполняется режим ОБНОВЛЕНИЯ - обновляем контракт
 			// но лишь при условии, что контракт ещё НЕ ПОДПИСАН
-			$result = $this->db->query("SELECT `contracts`.signed FROM `contracts` WHERE `contracts`.id = ?", array($cID));
+			$result = $this->db->query("SELECT `contracts`.signed FROM `contracts` WHERE `contracts`.id = ?", array($contractID));
 			if($result->num_rows()){
 				$row = $result->row();
 				// если не подписан
@@ -124,19 +142,25 @@ class Cntmodel extends CI_Model{
 					$result = $this->db->query("UPDATE
 					`contracts`
 					SET
-					`contracts`.cont_number = ?,
+					`contracts`.cont_number     = ?,
 					`contracts`.cont_date_start = ?,
-					`contracts`.cont_date_end = ?
-					WHERE `contracts`.id = ?", array($c_number, $datestart, $dateend, $cID));
-					$this->cnt_serv_repack($cID);
+					`contracts`.cont_date_end   = ?
+					WHERE 
+					`contracts`.id              = ?", array(
+						$c_number,
+						$datestart,
+						$dateend,
+						$contractID
+					));
+					$this->cnt_serv_repack($contractID);
 					// чистим календарь услуг от ещё неисполненных услуг
-					//print $cID;
+					//print $contractID;
 					//return false;
 					$this->db->query("DELETE 
 						FROM `service_calendar` 
 						WHERE 
 						(NOT `service_calendar`.is_done OR ISNULL(`service_calendar`.is_done) )
-						AND `service_calendar`.contract_id = ?", array($cID)
+						AND `service_calendar`.contract_id = ?", array($contractID)
 					);
 
 					// извлекаем данные для календаря услуг.
@@ -146,7 +170,7 @@ class Cntmodel extends CI_Model{
 					// и тогда услуги окажутся в пропущенных. Ввести корректировку корректировки по NOW()) ??? надо ли ещё?
 					$result = $this->db->query("SELECT
 					service_calendar.service_id,
-					DATE_FORMAT(service_calendar.ordered_date, '%Y-%m-%d') as last_date
+					DATE_FORMAT(service_calendar.ordered_date, '%Y-%m-%d') AS last_date
 					FROM
 					service_calendar
 					WHERE `service_calendar`.`id` IN(
@@ -157,10 +181,10 @@ class Cntmodel extends CI_Model{
 						`service_calendar`.`contract_id` = ?
 						AND `service_calendar`.`is_done`
 						GROUP BY `service_calendar`.`service_id`
-					)", array($cID));
-					if($result->num_rows()){
-						foreach($result->result() as $row){
-							$shedule_corr[$row->service_id] = $row->last_date;
+					)", array($contractID));
+					if ( $result->num_rows() ) {
+						foreach ( $result->result() as $row ) {
+							$schedule_corr[$row->service_id] = $row->last_date;
 						}
 					}
 					// разбираем сами услуги и рассчитываем для каждой новый календарь
@@ -175,33 +199,32 @@ class Cntmodel extends CI_Model{
 					contract_services
 					INNER JOIN `services` ON (contract_services.serv_id = `services`.id)
 					WHERE
-					(contract_services.cont_id = ?)", array($cID));
-					if($result->num_rows()){
+					(contract_services.cont_id = ?)", array($contractID));
+					if ( $result->num_rows() ) {
 						//print $result->num_rows()."<br><br>";
-						foreach($result->result() as $row){
+						foreach ( $result->result() as $row ) {
 							//корректировка на число уже оказанных процедур
-							if(isset($shedule_corr[$row->serv_id])){
-								$c_date = explode("-", $shedule_corr[$row->serv_id]);
+							if ( isset( $schedule_corr[$row->serv_id] ) ) {
+								$c_date = explode("-", $schedule_corr[$row->serv_id]);
 								//$c_date_wd = date('w', mktime(0, 0, 0, $c_date[1] , $c_date[2] , $c_date[0]));
 								$servstart = date('Y-m-d', mktime(0, 0, 0, $c_date[1] , $c_date[2] , $c_date[0]));
 							}
 							// ВНИМАНИЕ НЕОБХОДИМ НОВЫЙ КАЛЬКУЛЯТОР ГРАФИКА
-							//$shedule = $this->shedule_calc($servstart, $row->bas_period, $row->bas_num, $wd);
+							//$schedule = $this->schedule_calc($servstart, $row->bas_period, $row->bas_num, $wd);
 
 							// сюда приходит, например 4  и что с ней делать? даты ведь нет и расчёт тоже невозможен.
 							// как вариант - проверить basdays  на формат даты, но это малопродуктивно или нет?
 
-
 							$basdays = ($row->bas_num == 1 && preg_match("/^\d\d\d\d\-\d\d\-\d\d$/", $row->bas_days)) 
 								? $row->bas_days
 								: explode(",", $row->bas_days);
-							$shedule = $this->shedule_calc2($servstart, $basdays, $row->bas_num);
+							$schedule = $this->schedule_calc2($servstart, $basdays, $row->bas_num);
 							// ПЕРЕПИСАТЬ ФУНКЦИЮ--- переписано?
 							
-							// вставляем услуги в график в $shedule уже находится массив со списком дат YYYY-MM-DD
-							$shedule_task = array();
-							foreach($shedule as $val){
-								array_push($shedule_task, "('".$val."', ".$row->serv_id.", ".$row->cont_id.", ".($row->serv_price * 100).")");
+							// вставляем услуги в график в $schedule уже находится массив со списком дат YYYY-MM-DD
+							$schedule_task = array();
+							foreach ( $schedule as $val ) {
+								array_push($schedule_task, "('".$val."', ".$row->serv_id.", ".$row->cont_id.", ".($row->serv_price * 100).")");
 							}
 							$result = $this->db->query("INSERT INTO
 							`service_calendar`(
@@ -209,7 +232,7 @@ class Cntmodel extends CI_Model{
 								`service_calendar`.service_id,
 								`service_calendar`.contract_id,
 								`service_calendar`.pricefixed
-							) VALUES ".implode($shedule_task, ",\n"));
+							) VALUES ".implode(",\n", $schedule_task));
 						}
 					}
 				} else {
@@ -230,11 +253,11 @@ class Cntmodel extends CI_Model{
 						`contracts`.cont_date_end,
 						`contracts`.parent)
 					VALUES( (SELECT `contracts`.crsid FROM `contracts` WHERE contracts.id = ?), ?, ?, ?, ? )", array(
-						$cID,
+						$contractID,
 						$c_number,
 						$datestart,
 						$dateend,
-						$cID
+						$contractID
 					));
 					$nID = $this->db->insert_id();
 					$this->db->trans_complete();
@@ -252,25 +275,25 @@ class Cntmodel extends CI_Model{
 					INNER JOIN `services` ON (contract_services.serv_id = `services`.id)
 					WHERE
 					(contract_services.cont_id = ?)", array($nID));
-					if($result->num_rows()){
-						foreach($result->result() as $row){
+					if ( $result->num_rows() ) {
+						foreach ( $result->result() as $row ) {
 							//корректировка на число уже оказанных процедур
-							if(isset($shedule_corr[$row->serv_id])){
-								$c_date = explode("-", $shedule_corr[$row->serv_id]);
+							if ( isset($schedule_corr[$row->serv_id]) ) {
+								$c_date = explode("-", $schedule_corr[$row->serv_id]);
 								//$c_date_wd = date('w', mktime(0, 0, 0, $c_date[1] , $c_date[2] , $c_date[0]));
 								$servstart = date('Y-m-d', mktime(0, 0, 0, $c_date[1] , $c_date[2] , $c_date[0]));
 							}
 							// ВНИМАНИЕ НЕОБХОДИМ НОВЫЙ КАЛЬКУЛЯТОР ГРАФИКА
-							//$shedule = $this->shedule_calc($servstart, $row->bas_period, $row->bas_num, $wd);
+							//$schedule = $this->schedule_calc($servstart, $row->bas_period, $row->bas_num, $wd);
 							$basdays = ($row->bas_num == 1 && preg_match("/^\d\d\d\d\-\d\d\-\d\d$/", $row->bas_days)) 
 								? $row->bas_days
 								: explode(",", $row->bas_days);
-							$shedule = $this->shedule_calc2($servstart, $basdays, $row->bas_num);
+							$schedule = $this->schedule_calc2($servstart, $basdays, $row->bas_num);
 							// ПЕРЕПИСАТЬ ФУНКЦИЮ--- переписано?
 							
-							$shedule_task = array();
-							foreach($shedule as $val){
-								array_push($shedule_task, "('".$val."', ".$row->serv_id.", ".$row->cont_id.", ".($row->serv_price * 100).")");
+							$schedule_task = array();
+							foreach ( $schedule as $val ) {
+								array_push($schedule_task, "('".$val."', ".$row->serv_id.", ".$row->cont_id.", ".($row->serv_price * 100).")");
 							}
 							$result = $this->db->query("INSERT INTO
 							`service_calendar`(
@@ -278,7 +301,7 @@ class Cntmodel extends CI_Model{
 								`service_calendar`.service_id,
 								`service_calendar`.contract_id,
 								`service_calendar`.pricefixed
-							) VALUES ".implode($shedule_task, ",\n"));
+							) VALUES ".implode(",\n", $schedule_task));
 						}
 					}
 				}
@@ -292,8 +315,8 @@ class Cntmodel extends CI_Model{
 			$crsid = $this->cntCourseIDGet();
 			// с курсом определились, берёмся за контракт.
 			// все данные готовы
-			$cID   = $this->insertNewContract($crsid, $c_number, $datestart, $dateend);
-			$this->cnt_serv_repack($cID);
+			$contractID   = $this->insertNewContract($crsid, $c_number, $datestart, $dateend);
+			$this->cnt_serv_repack($contractID);
 
 			// извлекаем данные для календаря услуг.
 			// для случая когда часть услуг уже оказана вводим поправку -
@@ -301,7 +324,7 @@ class Cntmodel extends CI_Model{
 			// (ЛОВУШКА разрыв может быть больше чем периодизация по календарю 
 			// и тогда услуги окажутся в пропущенных. Внести корректировку корректировки по NOW())
 			## выборка корректировок
-			$sheduleBias = $this->serviceCalendarBiasGet($cID);
+			$scheduleBias = $this->serviceCalendarBiasGet($contractID);
 
 			// разбираем услуги и рассчитываем для каждой новый календарь
 			// выбираем список услуг
@@ -312,32 +335,36 @@ class Cntmodel extends CI_Model{
 			`contract_services`.cont_id
 			FROM
 			`contract_services`
-			WHERE `contract_services`.`cont_id` = ?", array($cID));
+			WHERE `contract_services`.`cont_id` = ?", array($contractID));
 			if ($result->num_rows()) {
 				foreach ($result->result() as $row){
 					//корректировка графика на графики уже оказанных процедур
-					if (isset($sheduleBias[$row->serv_id])) {
-						$cDate     = explode("-", $sheduleBias[$row->serv_id]);
+					if (isset($scheduleBias[$row->serv_id])) {
+						$cDate     = explode("-", $scheduleBias[$row->serv_id]);
 						$servstart = date('Y-m-d', mktime(0, 0, 0, $cDate[1] , $cDate[2] , $cDate[0]));
 					}
 					// ВНИМАНИЕ НЕОБХОДИМ НОВЫЙ КАЛЬКУЛЯТОР ГРАФИКА???
-					//$shedule = $this->shedule_calc($servstart, $row->bas_period, $row->bas_num, $wd);
+					//$schedule = $this->schedule_calc($servstart, $row->bas_period, $row->bas_num, $wd);
 					$basdays = ($row->bas_num == 1 && preg_match("/^\d\d\d\d\-\d\d\-\d\d$/", $row->bas_days)) 
 						? $row->bas_days
 						: explode(",", $row->bas_days);
-					$shedule = $this->shedule_calc2($servstart, $basdays, $row->bas_num);
+					$schedule = $this->schedule_calc2($servstart, $basdays, $row->bas_num);
 					// ПЕРЕПИСАТЬ ФУНКЦИЮ
 					
-					$sheduleArray = array();
-					foreach ($shedule as $val) {
-						array_push($sheduleArray, "('".$val."', ".$row->serv_id.", ".$row->cont_id.")");
+					$scheduleArray = array();
+
+					foreach ($schedule as $key=>$val) {
+						if ($key == "0") {
+							continue;
+						}
+						array_push($scheduleArray, "('".$val."', ".$row->serv_id.", ".$row->cont_id.")");
 					}
 					$this->db->query("INSERT INTO
 					`service_calendar`(
 						`service_calendar`.ordered_date,
 						`service_calendar`.service_id,
 						`service_calendar`.contract_id
-					) VALUES ".implode($sheduleArray, ",\n"));
+					) VALUES ".implode(",\n", $scheduleArray));
 				}
 			}
 		}
@@ -346,11 +373,11 @@ class Cntmodel extends CI_Model{
 		`contracts`
 		SET
 		cont_date_end = ( SELECT  MAX(`service_calendar`.ordered_date) FROM `service_calendar` WHERE `service_calendar`.`contract_id` = ? )
-		WHERE contracts.id = ?", array($cID, $cID));
+		WHERE contracts.id = ?", array($contractID, $contractID));
 
 		//переадресация на контракт
 		//$this->load->helper("url");
-		//redirect("contracts/show/".$cID);
+		redirect("contracts/show/".$contractID);
 	}
 
 	private function cntCourseIDGet() {
@@ -389,9 +416,9 @@ class Cntmodel extends CI_Model{
 			$dateend,
 			0
 		));
-		$cID = $this->db->insert_id();
+		$contractID = $this->db->insert_id();
 		$this->db->trans_complete();
-		return $cID;
+		return $contractID;
 	}
 
 	private function serviceCalendarBiasGet($cID) {
@@ -489,7 +516,7 @@ class Cntmodel extends CI_Model{
 		} else {
 			array_push($contracts, "<tr><td colspan=3><h4>Информации о контрактах не найдено.<br>Создайте контракт и выберите оказываемые по нему услуги.</h4></td></tr>");
 		}
-		$output['contracts'] = implode($contracts, "\n");
+		$output['contracts'] = implode("\n", $contracts);
 		return $this->load->view('proc/courseitem', $output, true);
 	}
 
@@ -534,14 +561,14 @@ class Cntmodel extends CI_Model{
 		}
 
 		return "initdata = {
-			clients:  '".implode($clients,  "")."',
-			services: '".implode($services, "")."',
+			clients:  '".implode("", $clients)."',
+			services: '".implode("", $services)."',
 			cn: '".$number."'
 		}";
 	}
 
 	// извлечение данных контракта
-	public function cnt_data_get($cnt = 0) {
+	public function getContractData($cnt = 0) {
 		$cnt           = ($cnt) ? $cnt : $this->input->post('cnt');
 		$data          = $this->cntDataGet($cnt);		// выборка свойств самого контракта
 		$services      = $this->cntServicesGet($cnt);	// выборка свойств услуг по контракту
@@ -553,12 +580,12 @@ class Cntmodel extends CI_Model{
 		return "contract = {
 			data          : ".$data['contract_data'].",
 			servstartdate : '".$servstartdate."',
-			servlist      : '".implode($servicesList['list'], "")."',
+			servlist      : '".implode("", $servicesList['list'])."',
 			clientlist    : '".$clientsList."',
 			patient       : '',
 			services      : ".$c_services."
 		};
-		sp = { ".implode($servicesList['price'], ", ")." }";
+		sp = { ".implode(", ", $servicesList['price'])." }";
 	}
 
 	private function cntDataGet($cnt = 0) {
@@ -650,7 +677,7 @@ class Cntmodel extends CI_Model{
 			$string = $key.": { num: '".$val['num']."', days: '".$val['days']."', price: '".$val['price']."', price_k: '".$val['price_k']."', date: '".$val['date']."' }";
 			array_push($output, $string);
 		}
-		return "{ ".implode($output, ",")." }";
+		return "{ ".implode(",", $output)." }";
 	}
 	
 	private function cntServicesFullListDataGet () {
@@ -693,7 +720,7 @@ class Cntmodel extends CI_Model{
 				array_push($output, $string);
 			}
 		}
-		return implode($output, "");
+		return implode("", $output);
 	}
 	// конец извлечения данных контракта
 
@@ -712,11 +739,7 @@ class Cntmodel extends CI_Model{
 				array_push($patients, $string);
 			}
 		}
-		return "data = '".implode($patients, "")."'";
-	}
-
-	public function addnew(){
-		return $this->load->view('proc/newcontract', array(), true);
+		return "data = '".implode("", $patients)."'";
 	}
 
 	public function underwrite(){
@@ -742,7 +765,7 @@ class Cntmodel extends CI_Model{
 			) {
 				$basdays = ( $this->input->post('servdaylist'.$i, true) )
 					? $this->input->post('servdaylist'.$i, true)
-					: implode(array_reverse(explode(".", $this->input->post('servdate'.$i, true))), "-");
+					: implode("-", array_reverse(explode(".", $this->input->post('servdate'.$i, true))));
 
 				$string = "(".$cID.", ".$this->input->post('service'.$i, true).", ".$this->input->post('num'.$i, true).", '".$basdays."', '".($this->input->post('servprice'.$i, true)).$this->input->post('servprice_k'.$i, true)."')";
 				array_push($servoutput, $string);
@@ -757,11 +780,11 @@ class Cntmodel extends CI_Model{
 			`contract_services`.bas_num,
 			`contract_services`.bas_days,
 			`contract_services`.refprice
-		) VALUES ".implode($servoutput, ",\n"));
+		) VALUES ".implode(",\n", $servoutput));
 	}
 
 	// deprecated, left here for future analysis
-	public function shedule_calc($startdate=0, $period=1, $rounds=1, $wd=true){
+	public function schedule_calc($startdate=0, $period=1, $rounds=1, $wd=true){
 		$output = array();
 		$date  = explode('-', $startdate);
 		$year  = $date[0];
@@ -790,8 +813,8 @@ class Cntmodel extends CI_Model{
 		return $output;
 	}
 
-	// sheduler now used:
-	private function shedule_calc2($startdate=0, $days=array(), $rounds=1){
+	// scheduler now used:
+	private function schedule_calc2($startdate=0, $days=array(), $rounds=1){
 		$output  = array($days);
 		//print implode($days, ", ")."<br>";
 		//два режима работы - вставка услуги на единственный день и вставка услуги по опорному графику по дням недели

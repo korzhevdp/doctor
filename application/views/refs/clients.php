@@ -7,7 +7,7 @@
 </style>
 <h3>
 	Клиенты&nbsp;&nbsp;&nbsp;<small>Балтийские Реабилитационные Технологии</small>
-	<a href="/refs/new_client" class="btn btn-warning pull-right" style="margin-right:10px;">Добавить</a>
+	<a href="<?=base_url();?>refs/new_client" class="btn btn-warning pull-right" style="margin-right:10px;">Добавить</a>
 </h3>
 <table class="table table-condensed table-bordered table-striped table-hover">
 	<tr>
@@ -41,7 +41,7 @@
 		<u><span id="headerfio" class=""><span></u>
 	</div>
 	<div class="modal-body" style="height:420px;overflow:hidden;">
-		<form method="post" id="clientDataForm" action="/refs/client_save" enctype="multipart/form-data" class="form-inline row-fluid">
+		<form method="post" id="clientDataForm" action="<?=base_url();?>refs/client_save" enctype="multipart/form-data" class="form-inline row-fluid">
 			<table>
 			<tr>
 				<td>Фамилия</td>
@@ -90,7 +90,7 @@
 		</form>
 	</div>
 	<div class="modal-footer">
-			<button type="submit" class="btn btn-primary btn-block" id="clientDataSave" style="margin-top:10px;">Сохранить</button>
+		<button type="submit" class="btn btn-primary btn-block" id="clientDataSave" style="margin-top:10px;">Сохранить</button>
 	</div>
 </div>
 

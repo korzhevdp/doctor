@@ -4,15 +4,17 @@ class Payments extends CI_Controller {
 
 	function __construct(){
 		parent::__construct();
-		$this->load->model("shedmodel");
-		$this->load->model("toolmodel");
-		//$this->load->model("crsmodel");
-		//$this->output->enable_profiler(TRUE);
-		if(!$this->session->userdata('userid')){
+		session_start();
+		if ( !isset($_SESSION['userid']) ) {
 			$this->load->helper("url");
 			redirect("login");
 			exit;
 		}
+		$this->load->model("shedmodel");
+		$this->load->model("toolmodel");
+		//$this->load->model("crsmodel");
+		//$this->output->enable_profiler(TRUE);
+
 	}
 
 	public function index(){

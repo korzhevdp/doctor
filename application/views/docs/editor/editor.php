@@ -3,12 +3,12 @@
 <head>
 	<title>Административная консоль сайта</title>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<script type="text/javascript" src="<?=$this->config->item('api');?>/jscript/jquery.js"></script>
-	<script type="text/javascript" src="<?=$this->config->item('api');?>/jqueryui/js/jqueryui.js"></script>
-	<script type="text/javascript" src="<?=$this->config->item('api');?>/bootstrap/js/bootstrap.js"></script>
-	<script type="text/javascript" src="/ckeditor/ckeditor.js"></script>
-	<link href="<?=$this->config->item('api');?>/bootstrap/css/bootstrap.css" rel="stylesheet">
-	<link href="<?=$this->config->item('api');?>/jqueryui/css/jqueryui.css" rel="stylesheet">
+	<script type="text/javascript" src="<?=base_url();?>jscript/jquery.js"></script>
+	<script type="text/javascript" src="<?=base_url();?>jqueryui/js/jqueryui.js"></script>
+	<script type="text/javascript" src="<?=base_url();?>bootstrap/js/bootstrap.js"></script>
+	<script type="text/javascript" src="<?=base_url();?>ckeditor/ckeditor.js"></script>
+	<link href="<?=base_url();?>bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link href="<?=base_url();?>jqueryui/css/jqueryui.css" rel="stylesheet">
 
 </head>
 

@@ -30,7 +30,7 @@
 
 <h3>Получение оплаты за услуги</h3>
 
-<form method="post" action="payments" class="form-horizontal">
+<form method="post" action="<?=base_url();?>payments" class="form-horizontal">
 	<div class="input-prepend">
 		<span class="add-on">Выберите клиента</span>
 		<select id="client_id" name="client_id" style="width:320px;">
@@ -62,7 +62,7 @@
 </table>
 
 <div class="modal hide" id="payData">
-	<form method="post" action="/payments/get_payment">
+	<form method="post" action="<?=base_url();?>payments/get_payment">
 		<div class="modal-header" style="cursor:move;background-color: #d6d6d6">
 			<button type="button" class="close" data-dismiss="modal"><i class="icon-remove"></i></button>
 			<h4>Вносится платёж</h4>

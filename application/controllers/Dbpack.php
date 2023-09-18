@@ -4,6 +4,7 @@ class Dbpack extends CI_Controller {
 
 	function __construct(){
 		parent::__construct();
+		$this->mkb10();
 		//phpinfo();
 		$this->output->enable_profiler(TRUE);
 	}
@@ -30,7 +31,7 @@ CREATE TABLE `mkb10` (
 		ob_start();
 		set_time_limit (0);
 
-		$array = file("mkb10-e.txt");
+		$array = file("backup/mkb10-e.txt");
 		$i = 0;
 		$this->db->query("DROP TABLE IF EXISTS `mkb10`");
 		$this->db->query("CREATE TABLE `mkb10` (
@@ -42,12 +43,13 @@ CREATE TABLE `mkb10` (
 		`subsection2` int(11) DEFAULT NULL,
 		`sign` char(1) DEFAULT NULL,
 		`content` text,
+		`string` text,
 		`prefix` text,
 		`excl` text,
 		`incl` text,
 		`note` text,
 		PRIMARY KEY (`id`)
-		) ENGINE=InnoDB AUTO_INCREMENT=11344 DEFAULT CHARSET=utf8");
+		) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8");
 		foreach($array as $key=>$val){
 			$output = array(0 => '', 1 => '', 2 => '', 3 => '');
 			$df = explode("\t", $val);
@@ -70,8 +72,9 @@ CREATE TABLE `mkb10` (
 				`mkb10`.`content`,
 				`mkb10`.`incl`,
 				`mkb10`.`excl`,
-				`mkb10`.`note`
-			) VALUES ( ?, ?, ?, ? )", array($output[0], $output[1], $output[2], $output[3]));
+				`mkb10`.`note`,
+				`mkb10`.`string`
+			) VALUES ( ?, ?, ?, ?, ? )", array($output[0], $output[1], $output[2], $output[3], $val));
 			print $i++."<br>";
 			//--;
 			flush();

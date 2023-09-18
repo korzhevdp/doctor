@@ -4,7 +4,8 @@ class Processnew extends CI_Controller {
 
 	function __construct(){
 		parent::__construct();
-		if(!$this->session->userdata('userid')){
+		session_start();
+		if ( !isset($_SESSION['userid']) ) {
 			$this->load->helper("url");
 			redirect("login");
 			exit;

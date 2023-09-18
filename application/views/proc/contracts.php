@@ -6,7 +6,7 @@
 </ul>
 <div class="tab-content">
 	<div class="tab-pane active" id="tab1">
-		<a href="/contracts/add" class="btn btn-warning pull-right" style="margin-right:10px;">Добавить контракт</a><br><br>
+		<a href="<?=base_url();?>contracts/add" class="btn btn-warning pull-right" style="margin-right:10px;">Добавить контракт</a><br><br>
 		<table class="table table-condensed table-bordered" style="margin-bottom:60px;margin-right:10px;">
 			<tr>
 			<th>Данные контракта</th>

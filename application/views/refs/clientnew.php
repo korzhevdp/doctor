@@ -79,7 +79,7 @@
 </table>
 <input type="hidden" form="clientDataForm" id="clientID" name="clientid" value="<?=$id?>" />
 
-<form method="post" id="clientDataForm" action="/refs/client_item_add" enctype="multipart/form-data" class="form-inline row-fluid">
+<form method="post" id="clientDataForm" action="<?=base_url();?>refs/client_item_add" enctype="multipart/form-data" class="form-inline row-fluid">
 </form>
 <?=$actbtn?>
 <button type="submit" class="btn btn-primary" id="clientDataSave">Сохранить</button>

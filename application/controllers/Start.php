@@ -4,22 +4,23 @@ class Start extends CI_Controller {
 
 	function __construct(){
 		parent::__construct();
-		//phpinfo();
-		//$this->output->enable_profiler(TRUE);
+		session_start();
 		$this->load->model("shedmodel");
 	}
 
 	public function index(){
-		$output = array();
-		$output['menu'] = $this->load->view('menu', $output, true);
-		if(!$this->session->userdata('userid')){
-			$output['content'] = $this->load->view('welcome', $output, true);
-		}else{
-			$output['content'] = "";
-			if($this->session->userdata('rank') < 3){
-				$output['content'] .= $this->shedmodel->shed_summary_get();
+		$output = array(
+			'menu'    => $this->load->view('menu', array(), true),
+			'content' => $this->load->view('welcome', array(), true)
+		);
+
+		if ( isset($_SESSION['userid']) ) {
+			if ( isset($_SESSION['rank'] ) && $_SESSION['rank'] < 3 ) {
+				$output['content'] = $this->shedmodel->shed_summary_get();
 			}
 			$output['content'] .= $this->shedmodel->myshedule();
+			$this->load->view('view', $output);
+			return true;
 		}
 		$this->load->view('view', $output);
 	}

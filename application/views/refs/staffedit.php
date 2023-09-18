@@ -69,7 +69,7 @@
 			</tr>
 			<tr>
 				<td>Дата рождения</td>
-				<td><input type="text" form="staffDataForm" name="birth" id="birth" class="withCal" tab="1" tabindex=7 value="<?=$staff_birthdate?>"></td>
+				<td><input type="date" form="staffDataForm" name="birth" id="birth" tab="1" tabindex=7 value="<?=$staff_birthdate?>"></td>
 			</tr>
 			<tr>
 				<td>Телефон</td>
@@ -93,7 +93,7 @@
 			</tr>
 			<tr>
 				<td>Паспорт, дата выдачи</td>
-				<td><input type="text" form="staffDataForm" name="pass_issuedate" class="withCal" id="pass_issuedate" tabindex=14 value="<?=$staff_pass_issuedate?>"></td>
+				<td><input type="date" form="staffDataForm" name="pass_issuedate" id="pass_issuedate" tabindex=14 value="<?=$staff_pass_issuedate?>"></td>
 			</tr>
 			<tr>
 				<td>ИНН</td>
@@ -135,7 +135,7 @@
 			</tr>
 			<tr>
 				<td>Курируемый район</td>
-				<td><input type="text" form="staffDataForm" name="location" id="location" tabindex=8  value="<?=$staff_location?>"></td>
+				<td><input type="text" form="staffDataForm" name="location" id="location" tabindex=8 value="<?=$staff_location?>"></td>
 			</tr>
 		</table>
 		<hr>
@@ -176,7 +176,7 @@
 </div>
 <?=$actbtn?>
 <a class="btn btn-primary" id="staffSave" style="margin-left:335px;">Сохранить данные</a>
-<form method="post" id="staffDataForm" action="/refs/staff_save" enctype="multipart/form-data">
+<form method="post" id="staffDataForm" action="<?=base_url();?>refs/staff_save" enctype="multipart/form-data">
 </form>
 
 
@@ -196,7 +196,7 @@
 	function deactivate_staff(){
 		staffid = $("#staffID").val();
 		$.ajax({
-			url: "/refs/staff_deactivate",
+			url: "<?=base_url();?>refs/staff_deactivate",
 			type: "POST",
 			data: { staffid: staffid },
 			success: function(){
@@ -211,7 +211,7 @@
 	function activate_staff(){
 		staffid = $("#staffID").val();
 		$.ajax({
-			url: "/refs/staff_activate",
+			url: "<?=base_url();?>refs/staff_activate",
 			type: "POST",
 			data: { staffid: staffid },
 			success: function(){
@@ -250,35 +250,15 @@
 		}
 	});
 
-	$("#credChange").unbind().click(function(){
-		if($(this).attr("checked") == 'checked'){
+	$("#credChange").unbind().click(function() {
+		if ( $(this).attr("checked") == 'checked') {
 			$("#username, #userpass, #userpassR, #masterPass").removeAttr('disabled');
 			$("#masterPassTable").removeClass("hide");
-		}else{
-			$("#username, #userpass, #userpassR, #masterPass").attr('disabled', 'disabled');
-			$("#masterPassTable").addClass("hide");
+			return true;
 		}
+
+		$("#username, #userpass, #userpassR, #masterPass").attr('disabled', 'disabled');
+		$("#masterPassTable").addClass("hide");
 	});
-
-
-
-	$.datepicker.regional['ru'] = {
-	closeText: 'Закрыть',
-	prevText: '&#x3c;Пред',
-	nextText: 'След&#x3e;',
-	currentText: 'Сегодня',
-	monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
-	monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
-	dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
-	dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
-	dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
-	dateFormat: 'dd.mm.yy',
-	firstDay: 1,
-	isRTL: false
-	};
-	$(".withCal").datepicker($.datepicker.regional['ru']);
-	//changeMonth and changeYear
-	//$(".withCal").datepicker( "option", "showWeek", true );
-	$(".withCal").datepicker( "option", "changeYear", true);
 //-->
 </script>

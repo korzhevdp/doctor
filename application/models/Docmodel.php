@@ -129,7 +129,7 @@ class Docmodel extends CI_Model{
 					$cluster[1] = $substs10[$val[2]];
 					// сброс в массив-накопитель
 					array_push($phrase, $quantors[$key].$finish);
-					array_push($phrase, implode($cluster, " "));
+					array_push($phrase, implode(" ", $cluster));
 					// выход из обработки разрядной группы
 					continue;
 				}else{
@@ -145,7 +145,7 @@ class Docmodel extends CI_Model{
 					$cluster[1] = $substs10[$val[2]];
 					// сброс в массив-накопитель
 					array_push($phrase, $quantors[$key].$finish);
-					array_push($phrase, implode($cluster, " "));
+					array_push($phrase, implode("", $cluster));
 					continue;
 				}else{
 					$cluster[1] = $substs100[$val[1]];
@@ -161,9 +161,9 @@ class Docmodel extends CI_Model{
 			}
 			// сброс в массив-накопитель
 			array_push($phrase, $quantors[$key].$finish);
-			array_push($phrase, implode($cluster, " "));
+			array_push($phrase, implode(" ", $cluster));
 		}
-		return implode(array_reverse($phrase), " ");
+		return implode(" ", array_reverse($phrase));
 	}
 
 	public function contract_get($id){
@@ -198,13 +198,13 @@ class Docmodel extends CI_Model{
 		INNER JOIN `contracts` ON (`courses`.id = `contracts`.crsid)
 		WHERE
 		(`contracts`.`id` = ?)", array($id));
-		if($result->num_rows()){
+		if ( $result->num_rows() ) {
 			$out = $result->row_array();
 			$stm = explode("." ,$out['cont_date_start']);
 			$etm = explode("." ,$out['cont_date_end']);
 			$months = array( 1 => 'января', 2 => 'февраля', 3 => 'марта', 4 => 'апреля', 5 => 'мая', 6 => 'июня', 7 => 'июля', 8 => 'августа', 9 => 'сентября', 10 => 'октября', 11 => 'ноября', 12 => 'декабря' );
-			$out['cont_date_start_w'] = implode(array($stm[0], $months[(int) $stm[1]], $stm[2]), ' ');
-			$out['cont_date_end_w'] = implode(array($etm[0], $months[(int) $etm[1]], $etm[2]), ' ');
+			$out['cont_date_start_w'] = implode("", array($stm[0], $months[(int) $stm[1]], $stm[2]));
+			$out['cont_date_end_w']   = implode("", array($etm[0], $months[(int) $etm[1]], $etm[2]));
 			$out['cli_gender1'] = ($out['cli_gender'] == 'm') ? 'ый' : 'ая' ;
 			$out['cli_gender2'] = ($out['cli_gender'] == 'm') ? 'ий' : 'ая' ;
 			$out['cli_gender3'] = ($out['cli_gender'] == 'm') ? '' : 'а' ;
@@ -263,7 +263,7 @@ class Docmodel extends CI_Model{
 			<td style="width:30mm;border:1px solid black;text-align:center;font-weight:bold;font-size:14pt;">'.$out['tprice'].'</td>
 		</tr>');
 		$out['tprice_w'] = $this->docmodel->num2words( ($totalprice / 100) );
-		$out['pricetable'] = '<table style="margin-bottom:0mm;margin-top:0mm;margin-left:-5mm;border-spacing:0mm;border-collapse:collapse">'.implode($pricetable, "\n").'</table>';
+		$out['pricetable'] = '<table style="margin-bottom:0mm;margin-top:0mm;margin-left:-5mm;border-spacing:0mm;border-collapse:collapse">'.implode("\n", $pricetable).'</table>';
 
 		//print $out;
 		// contract self
@@ -314,8 +314,8 @@ class Docmodel extends CI_Model{
 			$stm = explode("." ,$out['cont_date_start']);
 			$etm = explode("." ,$out['cont_date_end']);
 			$months = array( 1 => 'января', 2 => 'февраля', 3 => 'марта', 4 => 'апреля', 5 => 'мая', 6 => 'июня', 7 => 'июля', 8 => 'августа', 9 => 'сентября', 10 => 'октября', 11 => 'ноября', 12 => 'декабря' );
-			$out['cont_date_start_w'] = implode(array($stm[0], $months[(int) $stm[1]], $stm[2]), ' ');
-			$out['cont_date_end_w'] = implode(array($etm[0], $months[(int) $etm[1]], $etm[2]), ' ');
+			$out['cont_date_start_w'] = implode(" ", array($stm[0], $months[(int) $stm[1]], $stm[2]));
+			$out['cont_date_end_w']   = implode(" ", array($etm[0], $months[(int) $etm[1]], $etm[2]));
 			$out['cli_gender1'] = ($out['cli_gender'] == 'm') ? 'ый' : 'ая' ;
 			$out['cli_gender2'] = ($out['cli_gender'] == 'm') ? 'ий' : 'ая' ;
 			$out['cli_gender3'] = ($out['cli_gender'] == 'm') ? '' : 'а' ;
@@ -364,7 +364,7 @@ class Docmodel extends CI_Model{
 		$out['tprice'] = ($price % 10000 == 0) ? ($price / 10000) : substr($price, -4);
 		$out['tprice_k'] = substr($price, -4, 2);
 		$out['tprice_w'] = $this->docmodel->num2words($price);
-		$out['table'] = '<table style="margin-bottom:0mm;margin-top:0mm;margin-left:-18mm;width:170mm;border-spacing:0mm;border-collapse:collapse">'.implode($table, "\n").'</table>';
+		$out['table'] = '<table style="margin-bottom:0mm;margin-top:0mm;margin-left:-18mm;width:170mm;border-spacing:0mm;border-collapse:collapse">'.implode("\n", $table).'</table>';
 
 		//print $out;
 		// contract self

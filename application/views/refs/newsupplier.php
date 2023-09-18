@@ -20,7 +20,7 @@
 <button type="button" class="close" data-dismiss="modal"><i class="icon-remove"></i></button>
 <h4><span id="editorHeader">Редактирование данных поставщика</span>&nbsp;&nbsp;&nbsp;</h4>
 
-<form method="post" id="suppDataForm" action="/refs/supp_item_add" enctype="multipart/form-data" class="form-inline row-fluid">
+<form method="post" id="suppDataForm" action="<?=base_url();?>refs/supp_item_add" enctype="multipart/form-data" class="form-inline row-fluid">
 	<table class="suppDataTable table table-condensed">
 	<tr>
 		<td class="col1">Фамилия</td>

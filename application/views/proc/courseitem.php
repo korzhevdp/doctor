@@ -1,5 +1,5 @@
-<h3>Курс лечения&nbsp;&nbsp;&nbsp;<small><a href="/refs/patients.html#p<?=$pid;?>" title="Карточка пациента" target="_blank"><?=$pat_fio?></a></small></h3>
-<form method="post" action="courses/item_saveinfo">
+<h3>Курс лечения&nbsp;&nbsp;&nbsp;<small><a href="<?=base_url();?>refs/patients#p<?=$pid;?>" title="Карточка пациента" target="_blank"><?=$pat_fio?></a></small></h3>
+<form method="post" action="<?=base_url();?>courses/item_saveinfo">
 <style type="text/css">
 	.crsInfo td{
 		vertical-align: middle;

@@ -53,13 +53,13 @@
 				<td>Адрес</td>
 				<td><input type="text" name="address" id="address" tabindex=4></td>
 				<td style="padding-left:15px;">Паспорт, дата выдачи</td>
-				<td><input type="text" name="pass_issuedate" id="pass_issuedate" tab="1" class="withCal" tabindex=10></td>
+				<td><input type="date" name="pass_issuedate" id="pass_issuedate" tab="1" tabindex=10></td>
 			</tr>
 			<tr>
 				<td>Телефон, моб.</td>
-				<td><input type="text" name="cphone" id="cphone" tabindex=5></td>
+				<td><input type="tel" name="cphone" id="cphone" tabindex=5></td>
 				<td style="padding-left:15px;">Телефон, дом.</td>
-				<td><input type="text" name="hphone" id="hphone" tabindex=11></td>
+				<td><input type="tel" name="hphone" id="hphone" tabindex=11></td>
 			</tr>
 			<tr>
 				<td>E-mail</td>
@@ -87,7 +87,7 @@
 		<h4><span id="editorHeader">Добавление пациента&nbsp;&nbsp;&nbsp;&nbsp;<small>шаг 2.</small></span></h4>
 		<u><span id="headerfio" class=""><span></u>
 	<div class="modal-body" style="">
-		<form method="post" id="patDataForm" action="/refs/pat_save" enctype="multipart/form-data" class="form-inline row-fluid">
+		<form method="post" id="patDataForm" action="<?=base_url();?>refs/pat_save" enctype="multipart/form-data" class="form-inline row-fluid">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#tab1" id="htab1" data-toggle="tab">Пациент</a></li>
 				<li><a href="#tab2" id="htab2" data-toggle="tab">Информация для врача</a></li>
@@ -142,7 +142,7 @@
 						<td>Паспорт выдан</td>
 						<td><input type="text" name="pass_issued" id="pat_pass_issued" tabindex=9></td>
 						<td style="padding-left:15px;">Паспорт, дата выдачи</td>
-						<td><input type="text" name="pass_issuedate" id="pat_pass_issuedate" tab="1" class="withCal" tabindex=10></td>
+						<td><input type="date" name="pass_issuedate" id="pat_pass_issuedate" tab="1" tabindex=10></td>
 					</tr>
 					</table>
 				</div>
@@ -151,7 +151,7 @@
 					<tr>
 						<td style="width:160px;">Дата рождения</td>
 						<td>
-							<input type="text" name="birth" id="birth" tab="2" class="withCal" tabindex=4>
+							<input type="date" name="birth" id="birth" tab="2" tabindex=4>
 						</td>
 					</tr>
 					<tr>
@@ -202,18 +202,18 @@
 			<strong>Создание контракта невозможно</strong>
 		</div>
 		<h5>
-			<img src="images/cio.png" style="width:16px;height:16px;border:none;margin-right:10px;" alt="" >
+			<img src="<?=base_url();?>images/cio.png" style="width:16px;height:16px;border:none;margin-right:10px;" alt="" >
 			<a href="#" id="cHref" target="_blank">Клиент:</a>
-			<img src="images/question-button.png" style="width:16px;height:16px;border:none;margin-left:24px;" id="cOKMark" alt="" >
+			<img src="<?=base_url();?>images/question-button.png" style="width:16px;height:16px;border:none;margin-left:24px;" id="cOKMark" alt="" >
 		</h5>
 		<h5>
-			<img src="images/user_orange.png" style="width:16px;height:16px;border:none;margin-right:10px;" alt="" >
+			<img src="<?=base_url();?>images/user_orange.png" style="width:16px;height:16px;border:none;margin-right:10px;" alt="" >
 			<a href="#" id="pHref" target="_blank">Пациент: </a>
-			<img src="images/question-button.png" style="width:16px;height:16px;border:none;margin-left:15px;" id="pOKMark" alt="" >
+			<img src="<?=base_url();?>images/question-button.png" style="width:16px;height:16px;border:none;margin-left:15px;" id="pOKMark" alt="" >
 		</h5>
 		<hr>
 
-		<h5><img src="images/page_word.png" width="16" height="16" border="0" alt="">&nbsp;&nbsp;<a href="#" id="contLink" target="_blank">Перейти к созданию контракта</a></h5>
+		<h5><img src="<?=base_url();?>images/page_word.png" width="16" height="16" border="0" alt="">&nbsp;&nbsp;<a href="#" id="contLink" target="_blank">Перейти к созданию контракта</a></h5>
 	</div>
 	<div class="modal-footer">
 		<a href="#" class="btn btn-info pull-left toPat" style="margin-top:10px;">Назад</a>
@@ -282,7 +282,7 @@
 		}else{
 			if($("#cliId").val() == "0"){
 				$.ajax({
-					url: "/refs/client_item_add",
+					url: "<?=base_url();?>refs/client_item_add",
 					type: "POST",
 					data: {
 						client_f:       $("#client_f").val(),
@@ -315,7 +315,7 @@
 				});
 			}else{
 				$.ajax({
-					url: "/refs/client_save",
+					url: "<?=base_url();?>refs/client_save",
 					type: "POST",
 					data: {
 						client_f:       $("#client_f").val(),
@@ -372,7 +372,7 @@
 		}else{
 			if($("#patId").val() == "0"){
 				$.ajax({
-					url: "/refs/pat_item_add",
+					url: "<?=base_url();?>refs/pat_item_add",
 					type: "POST",
 					data: {
 						pat_f:          $("#pat_f").val(),
@@ -399,13 +399,21 @@
 						data = data.split(",");
 						build_lists(data[3], 0);
 						$("#patId").val(data[3]);
-						(parseInt(data[1]) == 1) ? $("#cOKMark").attr("src", "images/tick.png") : $("#cOKMark").attr("src", "images/question-button.png");
-						(parseInt(data[2]) == 1) ? $("#pOKMark").attr("src", "images/tick.png") : $("#pOKMark").attr("src", "images/question-button.png");
-						(parseInt(data[3]) != 0) ? $("#pHref").attr("href", "/refs/patients.html#p" + data[3]) : $("#pHref").attr("href", "#");
-						(parseInt($("#cliId").val()) != 0) ? $("#cHref").attr("href", "/refs/clients.html#c" + $("#cliId").val()) : $("#cHref").attr("href", "#");
+						(parseInt(data[1]) == 1) 
+							? $("#cOKMark").attr("src", "<?=base_url();?>images/tick.png") 
+							: $("#cOKMark").attr("src", "<?=base_url();?>images/question-button.png");
+						(parseInt(data[2]) == 1) 
+							? $("#pOKMark").attr("src", "<?=base_url();?>images/tick.png") 
+							: $("#pOKMark").attr("src", "<?=base_url();?>images/question-button.png");
+						(parseInt(data[3]) != 0) 
+							? $("#pHref").attr("href", "<?=base_url();?>refs/patients.html#p" + data[3]) 
+							: $("#pHref").attr("href", "#");
+						(parseInt($("#cliId").val()) != 0) 
+							? $("#cHref").attr("href", "<?=base_url();?>refs/clients.html#c" + $("#cliId").val()) 
+							: $("#cHref").attr("href", "#");
 						if(parseInt(data[1]) == 1 && parseInt(data[2]) == 1 && parseInt($("#cliId").val()) != 0 && parseInt(data[3]) != 0){
 							//alert("/contracts/" + $("#cliId").val() + "/" + data[3]);
-							$("#contLink").attr("href", "/contracts/contracts_show/" + $("#cliId").val() + "/" + data[3]).text("Перейти к созданию контракта");
+							$("#contLink").attr("href", "<?=base_url();?>contracts/contracts_show/" + $("#cliId").val() + "/" + data[3]).text("Перейти к созданию контракта");
 						}else{
 							$("#contLink").attr("href", "#").text("Недостаточно данных для офрормления контракта");
 						}
@@ -422,7 +430,7 @@
 				});
 			}else{
 				$.ajax({
-					url: "/refs/pat_save",
+					url: "<?=base_url();?>refs/pat_save",
 					type: "POST",
 					data: {
 						pat_f:          $("#pat_f").val(),
@@ -449,14 +457,27 @@
 					success: function(data){
 						build_lists($("#cliId").val(), 0);
 						data = data.split(",");
-						(parseInt(data[1]) == 1) ? $("#cOKMark").attr("src", "images/tick.png") : $("#cOKMark").attr("src", "images/question-button.png");
-						(parseInt(data[2]) == 1) ? $("#pOKMark").attr("src", "images/tick.png") : $("#pOKMark").attr("src", "images/question-button.png");
-						(parseInt($("#cliId").val()) != 0) ? $("#cHref").attr("href", "/refs/clients.html#" + $("#cliId").val()) : $("#cHref").attr("href", "#");
-						(parseInt($("#patId").val()) != 0) ? $("#pHref").attr("href", "/refs/patients.html#" + $("#patId").val()) : $("#pHref").attr("href", "#");
+						(parseInt(data[1]) == 1) 
+							? $("#cOKMark").attr("src", "<?=base_url();?>images/tick.png") 
+							: $("#cOKMark").attr("src", "<?=base_url();?>images/question-button.png");
+						(parseInt(data[2]) == 1) 
+							? $("#pOKMark").attr("src", "<?=base_url();?>images/tick.png") 
+							: $("#pOKMark").attr("src", "<?=base_url();?>images/question-button.png");
+						(parseInt($("#cliId").val()) != 0) 
+							? $("#cHref").attr("href", "<?=base_url();?>refs/clients.html#" + $("#cliId").val()) 
+							: $("#cHref").attr("href", "#");
+						(parseInt($("#patId").val()) != 0) 
+							? $("#pHref").attr("href", "<?=base_url();?>refs/patients.html#" + $("#patId").val()) 
+							: $("#pHref").attr("href", "#");
 
-						if(parseInt(data[1]) == 1 && parseInt(data[2]) == 1 && parseInt($("#cliId").val()) != 0 && parseInt(data[3]) != 0){
+						if (
+								parseInt(data[1]) == 1 
+								&& parseInt(data[2]) == 1 
+								&& parseInt($("#cliId").val()) != 0 
+								&& parseInt(data[3]) != 0
+							) {
 							//alert("/contracts/" + $("#cliId").val() + "/" + data[3]);
-							$("#contLink").attr("href", "/contracts/contracts_show/" + $("#cliId").val() + "/" + data[3]).text("Перейти к созданию контракта");
+							$("#contLink").attr("href", "<?=base_url();?>contracts/contracts_show/" + $("#cliId").val() + "/" + data[3]).text("Перейти к созданию контракта");
 						}else{
 							$("#contLink").attr("href", "#").text("Недостаточно данных для офрормления контракта");
 						}
@@ -525,7 +546,7 @@
 	
 	function build_lists(a, b){
 		$.ajax({
-			url: "/refs/pat_lists_get",
+			url: "<?=base_url();?>refs/pat_lists_get",
 			type: "POST",
 			data: { 
 				cli: a,
@@ -538,7 +559,7 @@
 				$("#clientid").unbind().change(function(){
 					var clientid = $(this).val();
 					$.ajax({
-						url: "/refs/client_item_get",
+						url: "<?=base_url();?>refs/client_item_get",
 						type: "POST",
 						data: { clientid: clientid },
 						dataType: 'script',
@@ -595,7 +616,7 @@
 				return false;
 			}
 			$.ajax({
-				url: "/mkb10/getbyid",
+				url: "<?=base_url();?>mkb10/getbyid",
 				type: "POST",
 				data: { 
 					id: m
